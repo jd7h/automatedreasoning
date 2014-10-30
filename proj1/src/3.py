@@ -81,7 +81,7 @@ def genProg(time):
 def search_sat_prog():
     lowerbound = 1
     upperbound = 100
-    output = None
+    last_success_output = None
     
     while lowerbound != upperbound:
         i = lowerbound + (upperbound - lowerbound) / 2
@@ -90,20 +90,21 @@ def search_sat_prog():
         print result
         
         if result:
+            last_success_output = output
             upperbound = i
         else:
             lowerbound = i+1
     
-    print output
+    print last_success_output
     
     return lowerbound  # Is equal to upperbound
     
 
 def main():
-    prog_str = genProg(56)
-    print try_prog(prog_str)[1]
+    #prog_str = genProg(56)
+    #print try_prog(prog_str)[1]
     
-    #search_sat_prog()
+    search_sat_prog()
     
     #result, output = try_prog(prog_str)
     
