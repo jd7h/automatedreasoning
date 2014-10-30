@@ -2,16 +2,15 @@ import sys
 
 from util.common import try_prog
 
-def genProg():
+def genProg(time):
     def runtime(i):
-        return i+5+1
+        return i+5+1 # The paper uses 1-indexed jobs
 
     result = ""
     
     result += "(define Status::(-> int int int))\n"
     
-    job_num = 3
-    time = 10
+    job_num = 12
     
     # Job status is {0,1,2}
     result += "(assert (and "
@@ -34,8 +33,8 @@ def genProg():
                 result += "(= (Status %d %d) 0) " % (j,tt)
             
             # After start, the job is running    
-            for tt in range(r):
-                result += "(= (Status %d %d) 1) " % (j,t+tt)
+            for rt in range(r):
+                result += "(= (Status %d %d) 1) " % (j,t+rt)
             
             # After done running, the job is completed, and stays completed until end of scope
             for tt in range(time - t - r): # Time we have, minus time we did not do anything, minus time the job takes to run
@@ -45,20 +44,71 @@ def genProg():
         result += ")\n"
     result += "))\n" 
     
+    result += "(assert (and \n"
+    for t in range(time):
+        # Job 3 may only start if jobs 1 and 2 have finished
+        result += "(=> (= (Status 2 %d) 1) (and (= (Status 0 %d) 2) (= (Status 1 %d) 2)))" % (t, t, t)
+        
+        # Job 5 may only start if jobs 3 and 4 have finished
+        result += "(=> (= (Status 4 %d) 1) (and (= (Status 2 %d) 2) (= (Status 3 %d) 2)))" % (t, t, t)
+        
+        # Job 7 may only start if jobs 3, 4 and 6 have finished
+        result += "(=> (= (Status 6 %d) 1) (and (= (Status 2 %d) 2) (= (Status 3 %d) 2) (= (Status 5 %d) 2)))" % (t, t, t, t)
+    
+        # Job 9 may only start if jobs 5 and 8 have finished
+        result += "(=> (= (Status 8 %d) 1) (and (= (Status 4 %d) 2) (= (Status 7 %d) 2)))" % (t, t, t)
+    
+        # Job 11 may only start if job 10 has finished
+        result += "(=> (= (Status 10 %d) 1) (= (Status 9 %d) 2))" % (t, t)
+    
+        # Job 12 may only start if jobs 9 and 11 have finished
+        result += "(=> (= (Status 11 %d) 1) (and (= (Status 8 %d) 2) (= (Status 10 %d) 2)))" % (t, t, t)
+    
+        # Job 8 may not start earlier than job 5
+        result += "(=> (= (Status 8 %d) 1) (>= (Status 5 %d) 1))" % (t, t)
+        
+        # Job 5, 7 and 10 require a special equipment of which only on which only one copy is available, so no two of these jobs may run at the same time
+        result += "(<= (+ (ite (= (Status 4 %d) 1) 1 0) (ite (= (Status 6 %d) 1) 1 0) (ite (= (Status 9 %d) 1) 1 0)) 1)" % (t, t, t)
+        
+    result += "))\n"
+    
     result += "(check)\n"
     result += "(show-model)\n"
-    
-    
+        
     return result
 
-def main():
-    prog_str = genProg()
-    print prog_str
+
+def search_sat_prog():
+    lowerbound = 1
+    upperbound = 100
+    output = None
     
-    result, output = try_prog(prog_str)
+    while lowerbound != upperbound:
+        i = lowerbound + (upperbound - lowerbound) / 2
+        print "%d (%d, %d)" % (i, lowerbound, upperbound)
+        result, output = try_prog(genProg(i))
+        print result
+        
+        if result:
+            upperbound = i
+        else:
+            lowerbound = i+1
     
-    print result
     print output
+    
+    return lowerbound  # Is equal to upperbound
+    
+
+def main():
+    prog_str = genProg(56)
+    print try_prog(prog_str)[1]
+    
+    #search_sat_prog()
+    
+    #result, output = try_prog(prog_str)
+    
+    #print result
+    #print output
     
     return 0
 
