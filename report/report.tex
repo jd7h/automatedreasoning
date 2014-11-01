@@ -49,7 +49,27 @@ We have to deliver \texttt{amount[o]} pallets of object \texttt{o}. Finally we a
 
 \[ \bigwedge_{0 \le i < o} \sum_{0 \le j < t} \texttt{Pallets j o} = \texttt{amount[o]}\]
 
-We use binary search to find the maximum number of pallets of prittles that we can deliver. The SMT-solver returned the value 20. Since this brings the total amount of delivered pallets to 47 and the maximum number of pallets we can carry with the six trucks is 48, this seems like a plausible solution.
+We use binary search to find the maximum number of pallets of prittles that we can deliver.
+The SMT-solver returned the value 20.
+We show the assignment found by the solver in figure \ref{fig:sub1table}.
+Since this brings the total amount of delivered pallets to 47 and the maximum number of pallets we can carry with the six trucks is 48, this seems like a plausible solution.
+
+\begin{figure}[h]
+    \begin{center}
+        \begin{tabular}{r|ccccc}
+        truck & \texttt{n} & \texttt{p} & \texttt{s} & \texttt{c} & \texttt{d} \\\hline
+        $t_0$ & 1 & 0 & 7 & 0 & 0 \\
+        $t_1$ & 0 & 0 & 0 & 5 & 2 \\
+        $t_2$ & 2 & 6 & 0 & 0 & 0 \\
+        $t_3$ & 0 & 0 & 0 & 5 & 3 \\
+        $t_4$ & 0 & 8 & 0 & 0 & 0 \\
+        $t_5$ & 1 & 6 & 1 & 0 & 0 \\\hline
+        total & 4 & 20 & 8 & 10 & 5 \\
+        \end{tabular}
+    \end{center}
+    \caption{Assignment of pallets to trucks for an optimal solution.}
+    \label{fig:sub1table}
+\end{figure}
 
 \subsection*{Scheduling of jobs}
 The problem: schedule twelve jobs with different running times, while adhering to a list of constraints. Investigate the minimal running time needed to complete all jobs.
