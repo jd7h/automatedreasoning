@@ -85,30 +85,28 @@ The job status must be either 0, 1 or 2, for all jobs and moments in time:
 \[ \bigwedge_{0 \le t < time} \bigwedge_{0 \le i < j} \texttt{Status i t} \ge 0\wedge \texttt{Status i t} \le 2\]
 
 We now want to specify the correct behaviour for each job. 
-Since the running time for each job i is i+5 and we want it to be finished before or on timeframe \texttt{time} (the end of the timeline), we have to start job i at timeframe $\texttt{time}-(i+5)$ at the latest.
+Since the running time for each job $i$ is $i+5$ and we want it to be finished before or on timeframe \texttt{time} (the end of the timeline), we have to start job $i$ at timeframe $\texttt{time}-(i+5)$ at the latest.
 We take $st_i$ as the starting time of job $i$, with $0 \le st_i < lt_i$ and $lt_i = \texttt{time}-(i+5)$.
 
 Before a job starts (1), it must be ready (0):
-\[ \bigwedge_{0 \le i < j} \bigvee_{0 \le st < lt_i} \bigwedge_{0 \le tt < st} \texttt{Status i tt} = 0 \]
+\[ \bigwedge_{0 \le tt < st_i} \texttt{Status i tt} = 0 \]
 
 We want the jobs to run without interrupt.
 In other words, if a job has started, it will not stop until it is finished. 
-If job $i$ starts at timeframe $st_i$,it keeps running in timeframes $st_i \dots st_i + i + 5$.
-\[ \bigwedge_{0 \le i < j} \bigvee_{0 \le st < lt_i} \bigwedge_{0 \le rt < i+5} \texttt{Status i st+rt} = 1 \]
+If job $i$ starts at timeframe $st_i$, it keeps running in timeframes $st_i \dots st_i + i + 5$.
+\[ \bigwedge_{0 \le rt < i+5} \texttt{Status i (st+rt)} = 1 \]
 
 If the job is done running, it is finished and it will stay finished for the remainder of the timeframes, starting at timeframe $st_i + i + 5$.
-\[ \bigwedge_{0 \le i < j} \bigvee_{0 \le st < lt} \bigwedge_{0 \le tt < time-st-i-5} \texttt{Status i tt} = 2 \]
+\[ \bigwedge_{0 \le tt < time-st-i-5} \texttt{Status i tt} = 2 \]
 
-\begin{comment}
 If we put these three conditions together, we get:
-$\bigwedge_{0 \le i < j} \bigvee_{0 \le st < lt_i} 
-\left( 
-\bigwedge_{0 \le tt < st} \texttt{Status i tt} = 0 \wedge \\
-\bigwedge_{0 \le tt < i+5} \texttt{Status i st+tt} = 1 \wedge \\
-\bigwedge_{0 \le tt < time-st-i-5} \texttt{Status i tt} = 2
-\right)
-$
-\end{comment}
+\[ \begin{array}{rll}
+    \bigwedge_{0 \le i < j} \bigvee_{0 \le st < lt_i} \left( \right.&& \\
+    & \bigwedge_{0 \le tt < st} & \texttt{Status i tt} = 0 ~ \wedge \\
+    & \bigwedge_{0 \le tt < i+5} & \texttt{Status i st+tt} = 1 ~ \wedge \\
+    & \bigwedge_{0 \le tt < time-st-i-5} & \texttt{Status i tt} = 2 \\
+\left. \right)
+\end{array} \]
 
 Now we have a number of job specific constraints. 
 If we want to express that job a is only allowed to start if job b and c have finished, we write: 
