@@ -47,8 +47,29 @@ Now we can easily express the constraint by adding the following to our formula:
 \[ \texttt{skt} \le 2 \]
 
 
+\subsection*{Computation steps}
+The problem: given a set of $N$ variables $a_1, \cdots, a_N$ and their initial value.
+For all variables except $a_1$ and $a_N$, it is possible to either do nothing, or assign a new value to the variable:
+\[ a_v = a_{v-1} + a_{v+1} \]
+We need to find the minimum number of steps required for any of these variables to attain the value 157.
+We compute this by fixing the number of steps $T$, and then defining a function
+\[\texttt{A :: Int -> Int -> Int}\]
+such that \texttt{A v t} is the value of variable $a_v$ after $t$ steps.
 
+First we define the initial value for all variables:
+\[ \bigwedge_{1 \le v \le N} \texttt{A v 0} = v \]
+Then we define the steps allowed for each variable.
+For the first and last variable we have:
+\[ \bigwedge_{v \in \{1, N\}} \bigwedge_{0 \le t < T} \texttt{A v (t+1)} = \texttt{A v t} \]
+For all other variables we have:
+\[ \bigwedge_{1 < v < N} \bigwedge_{0 \le t < T} (\texttt{A v (t+1)} = \texttt{A v t}) \vee (\texttt{A v (t+1)} = \texttt{A (v-1) t} + \texttt{A (v+1) t}) \]
+Finally we define the end-goal:
+\[ \bigvee_{1 \le v \le N} \texttt{A v T} = 157 \]
+
+To find the minimum number of steps required, we use binary search on the number of steps $T$.
+If for any $T$ the problem is satisfiable, the problem is also satisfiable for $T+1$, because the ``do nothing''-step can always be chosen.
+Thus binary search is applicable in this case.
+
+Our algorithm for binary search concludes that the problem can be solved in at least 6 steps.
 
 \end{document}
-
-
