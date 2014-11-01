@@ -29,17 +29,16 @@ We start out by introducing our representation. We have a function
 \texttt{Pallets t o} returns the number of pallets of object \texttt{o} that truck \texttt{t} is carrying.
 
 Trucks cannot carry a negative amount of pallets:
-\[ \bigwedge_{0 \le i < t} ( \bigwedge_{0 \le j < o} \texttt{Pallets i j} \ge 0 ) \]
+\[ \bigwedge_{0 \le i < t} \bigwedge_{0 \le j < o} \texttt{Pallets i j} \ge 0 \]
 
 Trucks cannot carry more than $p$ pallets:
-\[ \bigwedge_{0 \le i < t} \texttt{(Pallets i 0)} + \texttt{(Pallets i 1)} \dots + \texttt{(Pallets i o)} \le p\]
+\[ \bigwedge_{0 \le i < t} ~ ( \sum_{0 \le j < o} \texttt{Pallets i j} ) \le p \]
 
 Each pallet of object \texttt{o} weighs \texttt{weight[o]} kg. Trucks cannot carry more than the maximum weight of $c$ kg:
-\[ \bigwedge_{0 \le i < t} \texttt{(Pallets i 0)} \cdot \texttt{weight[0]} + \dots + \texttt{(Pallets i o)} \cdot \texttt{weight[o]} \le c \]
+\[ \bigwedge_{0 \le i < t} ~ (\sum_{0 \le j < o} \texttt{Pallets i j} \cdot \texttt{weight[j]}) \le c \]
 Prittles and crottles are not allowed in the same truck. In other words, for every truck \texttt{t} it should not be possible that \texttt{(Pallets t prittles)} and \texttt{(Pallets t crottles)} are both greater than 0:
-\[ \bigwedge_{0 \le i < t} \neg ( \texttt{Pallets i prittles} > 0) \wedge (\texttt{Pallets i crottles} > 0 ))\]
+\[ \bigwedge_{0 \le i < t} \neg \left(( \texttt{Pallets i prittles} > 0) \wedge (\texttt{Pallets i crottles} > 0 )\right)\]
 
-//hier ben ik niet helemaal tevreden over:
 There can be at most 2 trucks carrying skipples. To be able to express this constraint, we first need to count the number of trucks carrying skipples. We introduce a variable \texttt{skt} to count the number of skipple-carrying trucks. We calculate the value of this integer by summing over all trucks \texttt{t} with a simple if-then-else-statement in yices: 
 \[ \texttt{skt} = \sum_{0\le i < t} \texttt{(ite (> (Pallets i skipples) 0) 1 0)}\]
 
