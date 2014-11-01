@@ -22,7 +22,7 @@ Judith van Stegeren\\
 \subsection*{Trucks and pallets}
 The problem: find a way to load pallets of different objects onto 6 trucks, while adhering to various constraints. Investigate what is the maximum number of pallets of prittles that can be delivered, and show how for that number all pallets may be divided over the six trucks.
 
-We have generalized the problem in the following way: given $t$ trucks with a capacity of $c$ that can carry at most $p$ pallets, a list of numbers of pallets of nuzzles, skipples, crottles and dupples and a list of the weight of a pallet of each of these items, maximize the number of pallets of prittles that can be delivered.
+We have generalized the problem in the following way: given $t$ trucks with a capacity of $c$ that can carry at most $p$ pallets, an array \texttt{amount} of numbers of pallets of nuzzles, skipples, crottles and dupples and an array \texttt{weight} of the weight of a pallet of each of these items, maximize the number of pallets of prittles that can be delivered.
 
 We start out by introducing our representation. We have a function 
 \[\texttt{Pallets :: Int -> Int -> Int}\]
@@ -45,6 +45,37 @@ There can be at most 2 trucks carrying skipples. To be able to express this cons
 
 Now we can easily express the constraint by adding the following to our formula:
 \[ \texttt{skt} \le 2 \]
+
+We have to deliver \texttt{amount[o]} pallets of object \texttt{o}. Finally we assert that all pallets in the delivery should be loaded onto the trucks:
+
+\[ \bigwedge_{0 \le i < o} \sum_{0 \le j < t} \texttt{Pallets j o} = \texttt{amount[o]}\]
+
+We use binary search to find the maximum number of pallets of prittles that we can deliver. The SMT-solver returned the value 20. Since this brings the total amount of delivered pallets to 47 and the maximum number of pallets we can carry with the six trucks is 48, this seems like a plausible solution.
+
+\subsection*{Scheduling of jobs}
+The problem: schedule twelve jobs with different running times, while adhering to a list of constraints. Investigate the minimal running time needed to complete all jobs.
+Our solution works for a arbitrary number of jobs. We want to schedule $j$ jobs numbered from 1 to $j$. The running time for job $i = i+5$.
+Our representation is as follows. We have a timeline of length \texttt{time}. For every moment in time, we have a status code for every job: it is either ready (0), running (1) or finished (2). 
+For this we have the function 
+\[\texttt{Status :: Int -> Int -> Int}\]
+\texttt{Status 0 10 2} means that job 1 at timeframe 10 is finished. 
+
+The job status must be either 0, 1 or 2, for all jobs and moments in time:
+\[ \bigwedge_{0 \le t < time} \bigwedge_{0 \le i < j} \texttt{Status i t} \ge 0\wedge \texttt{Status i t} \le 2\]
+
+We now want to specify the correct behaviour for each job. 
+Since the running time for each job i is i+5 and we want it to be finished before or on timeframe \texttt{time} (the end of the timeline), we have to start job i at timeframe $\texttt{time}-(i+5)$ at the latest.
+We take $st_i$ as the starting time of job $i$, with $0 \le st_i < lt_i$ and $lt_i = \texttt{time}-(i+5)$.
+
+Before a job starts (1), it must be ready (0):
+\[ \bigwedge_{0 \le i < j} \bigvee_{0 \le st < lt} \bigwedge_{0 \le tt < st} \texttt{Status i tt} = 0 \]
+
+We want the jobs to run without interrupt.
+In other words, if a job has started, it will not stop until it is finished. 
+If job $i$ starts at timeframe $st_i$,it keeps running in timeframes $st_i \dots st_i + i + 5$.
+\[ \bigwedge_{0 \le i < j} \bigvee_{0 \le st < lt} \bigwedge_{0 \le rt < i+5} \texttt{Status i st+rt} = 1 \]
+
+If the job is done running, it is finished and it will stay finished for the remainder of the timeframes, starting at timeframe $st_i + i + 5$.
 
 
 \subsection*{Computation steps}
