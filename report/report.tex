@@ -24,27 +24,24 @@ Judith van Stegeren\\
 The problem: find a way to load pallets of different objects onto 6 trucks, while adhering to various constraints. Investigate what is the maximum number of pallets of prittles that can be delivered, and show how for that number all pallets may be divided over the six trucks.
 
 We have generalized the problem in the following way: given $t$ trucks with a capacity of $c$ that can carry at most $p$ pallets, an array \texttt{amount} of numbers of pallets of nuzzles, skipples, crottles and dupples and an array \texttt{weight} of the weight of a pallet of each of these items, maximize the number of pallets of prittles that can be delivered.
+Note that we either use the number `$0$' or the full name `\texttt{nuzzles}' or the single letter `\texttt{n}' to denote the index corresponding to nuzzles.
 
 We start out by introducing our representation. We have a function 
 \[\texttt{Pallets :: Int -> Int -> Int}\]
 \texttt{Pallets t o} returns the number of pallets of object \texttt{o} that truck \texttt{t} is carrying.
 
 Trucks cannot carry a negative amount of pallets:
-\[ \bigwedge_{0 \le i < t} ( \bigwedge_{0 \le j < o} \texttt{Pallets i j} \ge 0 ) \]
+\[ \bigwedge_{0 \le i < t} \bigwedge_{0 \le j < o} \texttt{Pallets i j} \ge 0 \]
 
 Trucks cannot carry more than $p$ pallets:
-\[ \bigwedge_{0 \le i < t} \texttt{(Pallets i 0)} + \texttt{(Pallets i 1)} \dots + \texttt{(Pallets i o)} \le p\]
+\[ \bigwedge_{0 \le i < t} ~ ( \sum_{0 \le j < o} \texttt{Pallets i j} ) \le p \]
 
 Each pallet of object \texttt{o} weighs \texttt{weight[o]} kg. Trucks cannot carry more than the maximum weight of $c$ kg:
-\[ \bigwedge_{0 \le i < t} \texttt{(Pallets i 0)} \cdot \texttt{weight[0]} + \dots + \texttt{(Pallets i o)} \cdot \texttt{weight[o]} \le c \]
+\[ \bigwedge_{0 \le i < t} ~ (\sum_{0 \le j < o} \texttt{Pallets i j} \cdot \texttt{weight[j]}) \le c \]
 Prittles and crottles are not allowed in the same truck. In other words, for every truck \texttt{t} it should not be possible that \texttt{(Pallets t prittles)} and \texttt{(Pallets t crottles)} are both greater than 0:
-\[ \bigwedge_{0 \le i < t} \neg ( \texttt{Pallets i prittles} > 0) \wedge (\texttt{Pallets i crottles} > 0 ))\]
+\[ \bigwedge_{0 \le i < t} \neg \left(( \texttt{Pallets i prittles} > 0) \wedge (\texttt{Pallets i crottles} > 0 )\right)\]
 
-%hier ben ik niet helemaal tevreden over:
-There can be at most 2 trucks carrying skipples. 
-To be able to express this constraint, we first need to count the number of trucks carrying skipples. 
-We introduce a variable \texttt{skt} to count the number of skipple-carrying trucks. 
-We calculate the value of this integer by summing over all trucks \texttt{t} with a simple if-then-else-statement in yices: 
+There can be at most 2 trucks carrying skipples. To be able to express this constraint, we first need to count the number of trucks carrying skipples. We introduce a variable \texttt{skt} to count the number of skipple-carrying trucks. We calculate the value of this integer by summing over all trucks \texttt{t} with a simple if-then-else-statement in yices: 
 \[ \texttt{skt} = \sum_{0\le i < t} \texttt{(ite (> (Pallets i skipples) 0) 1 0)}\]
 
 Now we can easily express the constraint by adding the following to our formula:
@@ -54,7 +51,27 @@ We have to deliver \texttt{amount[o]} pallets of object \texttt{o}. Finally we a
 
 \[ \bigwedge_{0 \le i < o} \sum_{0 \le j < t} \texttt{Pallets j o} = \texttt{amount[o]}\]
 
-We use binary search to find the maximum number of pallets of prittles that we can deliver. The SMT-solver returned the value 20. Since this brings the total amount of delivered pallets to 47 and the maximum number of pallets we can carry with the six trucks is 48, this seems like a plausible solution.
+We use binary search to find the maximum number of pallets of prittles that we can deliver.
+The SMT-solver returned the value 20.
+We show the assignment found by the solver in figure \ref{fig:sub1table}.
+Since this brings the total amount of delivered pallets to 47 and the maximum number of pallets we can carry with the six trucks is 48, this seems like a plausible solution.
+
+\begin{figure}[h]
+    \begin{center}
+        \begin{tabular}{r|ccccc}
+        truck & \texttt{n} & \texttt{p} & \texttt{s} & \texttt{c} & \texttt{d} \\\hline
+        $t_0$ & 1 & 0 & 7 & 0 & 0 \\
+        $t_1$ & 0 & 0 & 0 & 5 & 2 \\
+        $t_2$ & 2 & 6 & 0 & 0 & 0 \\
+        $t_3$ & 0 & 0 & 0 & 5 & 3 \\
+        $t_4$ & 0 & 8 & 0 & 0 & 0 \\
+        $t_5$ & 1 & 6 & 1 & 0 & 0 \\\hline
+        total & 4 & 20 & 8 & 10 & 5 \\
+        \end{tabular}
+    \end{center}
+    \caption{Assignment of pallets to trucks for an optimal solution.}
+    \label{fig:sub1table}
+\end{figure}
 
 \subsection*{Scheduling of jobs}
 The problem: schedule twelve jobs with different running times, while adhering to a list of constraints. Investigate the minimal running time needed to complete all jobs.
