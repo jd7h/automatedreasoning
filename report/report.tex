@@ -128,12 +128,15 @@ Job 12 may only start if job 9 and 11 have finished.
 \[ \bigwedge_{0 \le tt < time} (\texttt{Status 11 tt} = 1) \rightarrow (\texttt{Status 8 tt} = 2 \wedge \texttt{Status 10 tt} = 2) \]
 
 Another constraint is that job 8 may not start earlier than job 5, in other words, we want that if job 5 starts running, job 8 is either running as well or already finished:
-\[ \bigwedge_{- \le tt < time} (\texttt{Status 8 tt} = 1) \rightarrow (\texttt{Status 8 tt} > 0) \]
+\[ \bigwedge_{0 \le tt < time} (\texttt{Status 8 tt} = 1) \rightarrow (\texttt{Status 8 tt} > 0) \]
 
-For job 5, 7 and 10 we have that no two of these job may be running at the same time. We enforce this by counting the number of running jobs 5, 7 and 10 in each timeframe, and stating that in all timeframes this number is not allowed to be greater than 1. 
-We introduce a variable to count the number of running jobs 5, 7 and 10. We calculate the value of this integer by summing over jobs 5,7 and 10 with a simple if-then-else-statement in yices: 
-\[ nr = \sum_{i \in \{4,6,9\}} \texttt{ite (= 1 (Status i t)) 1 0} \]
-
+For job 5, 7 and 10 we have that no two of these job may be running at the same time. 
+We introduce a variable $nr_t$ to count the number of running jobs 5, 7 and 10 in timeframe $t$.
+We calculate the value of this integer by summing over jobs 5,7 and 10 with a simple if-then-else-statement in yices: 
+\[ nr_t = \sum_{i \in \{4,6,9\}} \texttt{ite (= 1 (Status i t)) 1 0} \]
+Now we can enforce the constraint by counting the number of running jobs 5, 7 and 10 in each timeframe, 
+and stating that this number is not allowed to be greater than 1. 
+\[ \bigwedge_{0 \le t < time} nr_t \le 1\]
 
 \subsection*{Computation steps}
 The problem: given a set of $N$ variables $a_1, \cdots, a_N$ and their initial value.
