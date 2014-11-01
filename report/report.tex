@@ -4,6 +4,7 @@
 \usepackage{amssymb}
 \usepackage{epic}
 \usepackage{graphicx}
+\usepackage{comment}
 %\pagestyle{empty}
 \newcommand{\tr}{\mbox{\sf true}}
 \newcommand{\fa}{\mbox{\sf false}}
@@ -39,8 +40,11 @@ Each pallet of object \texttt{o} weighs \texttt{weight[o]} kg. Trucks cannot car
 Prittles and crottles are not allowed in the same truck. In other words, for every truck \texttt{t} it should not be possible that \texttt{(Pallets t prittles)} and \texttt{(Pallets t crottles)} are both greater than 0:
 \[ \bigwedge_{0 \le i < t} \neg ( \texttt{Pallets i prittles} > 0) \wedge (\texttt{Pallets i crottles} > 0 ))\]
 
-//hier ben ik niet helemaal tevreden over:
-There can be at most 2 trucks carrying skipples. To be able to express this constraint, we first need to count the number of trucks carrying skipples. We introduce a variable \texttt{skt} to count the number of skipple-carrying trucks. We calculate the value of this integer by summing over all trucks \texttt{t} with a simple if-then-else-statement in yices: 
+%hier ben ik niet helemaal tevreden over:
+There can be at most 2 trucks carrying skipples. 
+To be able to express this constraint, we first need to count the number of trucks carrying skipples. 
+We introduce a variable \texttt{skt} to count the number of skipple-carrying trucks. 
+We calculate the value of this integer by summing over all trucks \texttt{t} with a simple if-then-else-statement in yices: 
 \[ \texttt{skt} = \sum_{0\le i < t} \texttt{(ite (> (Pallets i skipples) 0) 1 0)}\]
 
 Now we can easily express the constraint by adding the following to our formula:
@@ -68,14 +72,50 @@ Since the running time for each job i is i+5 and we want it to be finished befor
 We take $st_i$ as the starting time of job $i$, with $0 \le st_i < lt_i$ and $lt_i = \texttt{time}-(i+5)$.
 
 Before a job starts (1), it must be ready (0):
-\[ \bigwedge_{0 \le i < j} \bigvee_{0 \le st < lt} \bigwedge_{0 \le tt < st} \texttt{Status i tt} = 0 \]
+\[ \bigwedge_{0 \le i < j} \bigvee_{0 \le st < lt_i} \bigwedge_{0 \le tt < st} \texttt{Status i tt} = 0 \]
 
 We want the jobs to run without interrupt.
 In other words, if a job has started, it will not stop until it is finished. 
 If job $i$ starts at timeframe $st_i$,it keeps running in timeframes $st_i \dots st_i + i + 5$.
-\[ \bigwedge_{0 \le i < j} \bigvee_{0 \le st < lt} \bigwedge_{0 \le rt < i+5} \texttt{Status i st+rt} = 1 \]
+\[ \bigwedge_{0 \le i < j} \bigvee_{0 \le st < lt_i} \bigwedge_{0 \le rt < i+5} \texttt{Status i st+rt} = 1 \]
 
 If the job is done running, it is finished and it will stay finished for the remainder of the timeframes, starting at timeframe $st_i + i + 5$.
+\[ \bigwedge_{0 \le i < j} \bigvee_{0 \le st < lt} \bigwedge_{0 \le tt < time-st-i-5} \texttt{Status i tt} = 2 \]
+
+\begin{comment}
+If we put these three conditions together, we get:
+$\bigwedge_{0 \le i < j} \bigvee_{0 \le st < lt_i} 
+\left( 
+\bigwedge_{0 \le tt < st} \texttt{Status i tt} = 0 \wedge \\
+\bigwedge_{0 \le tt < i+5} \texttt{Status i st+tt} = 1 \wedge \\
+\bigwedge_{0 \le tt < time-st-i-5} \texttt{Status i tt} = 2
+\right)
+$
+\end{comment}
+
+Now we have a number of job specific constraints. 
+If we want to express that job a is only allowed to start if job b and c have finished, we write: 
+\[ \bigwedge_{0 \le tt < time} (\texttt{Status a tt} = 1) \rightarrow (\texttt{Status b tt} = 2 \wedge \texttt{Status c tt} = 2) \]
+
+Job 3 may only start if job 1 and 2 have finished.
+\[ \bigwedge_{0 \le tt < time} (\texttt{Status 2 tt} = 1) \rightarrow (\texttt{Status 0 tt} = 2 \wedge \texttt{Status 1 tt} = 2) \]
+Job 5 may only start if job 3 and 4 have finished.
+\[ \bigwedge_{0 \le tt < time} (\texttt{Status 4 tt} = 1) \rightarrow (\texttt{Status 2 tt} = 2 \wedge \texttt{Status 3 tt} = 2) \]
+Job 7 may only start if job 3, 4 and 6 have finished.
+\[ \bigwedge_{0 \le tt < time} (\texttt{Status 6 tt} = 1) \rightarrow (\texttt{Status 2 tt} = 2 \wedge \texttt{Status 3 tt} = 2 \wedge \texttt{Status 5 tt} = 2) \]
+Job 9 may only start if job 5 and 8 have finished.
+\[ \bigwedge_{0 \le tt < time} (\texttt{Status 8 tt} = 1) \rightarrow (\texttt{Status 4 tt} = 2 \wedge \texttt{Status 7 tt} = 2) \]
+Job 11 may only start if job 10 has finished.
+\[ \bigwedge_{0 \le tt < time} (\texttt{Status 10 tt} = 1) \rightarrow (\texttt{Status 9 tt} = 2\]
+Job 12 may only start if job 9 and 11 have finished.
+\[ \bigwedge_{0 \le tt < time} (\texttt{Status 11 tt} = 1) \rightarrow (\texttt{Status 8 tt} = 2 \wedge \texttt{Status 10 tt} = 2) \]
+
+Another constraint is that job 8 may not start earlier than job 5, in other words, we want that if job 5 starts running, job 8 is either running as well or already finished:
+\[ \bigwedge_{- \le tt < time} (\texttt{Status 8 tt} = 1) \rightarrow (\texttt{Status 8 tt} > 0) \]
+
+For job 5, 7 and 10 we have that no two of these job may be running at the same time. We enforce this by counting the number of running jobs 5, 7 and 10 in each timeframe, and stating that in all timeframes this number is not allowed to be greater than 1. 
+We introduce a variable to count the number of running jobs 5, 7 and 10. We calculate the value of this integer by summing over jobs 5,7 and 10 with a simple if-then-else-statement in yices: 
+\[ nr = \sum_{i \in \{4,6,9\}} \texttt{ite (= 1 (Status i t)) 1 0} \]
 
 
 \subsection*{Computation steps}
