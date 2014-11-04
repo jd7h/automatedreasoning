@@ -33,25 +33,25 @@ We start out by introducing our representation. We have a function
 \texttt{Pallets t o} returns the number of pallets of object \texttt{o} that truck \texttt{t} is carrying.
 
 Trucks cannot carry a negative amount of pallets:
-\[ \bigwedge_{0 \le i < t} \bigwedge_{0 \le j < o} \texttt{Pallets i j} \ge 0 \]
+\[ \bigwedge_{0 \le \texttt{i} < t} \bigwedge_{0 \le \texttt{j} < o} \texttt{Pallets i j} \ge 0 \]
 
 Trucks cannot carry more than $p$ pallets:
-\[ \bigwedge_{0 \le i < t} ~ ( \sum_{0 \le j < o} \texttt{Pallets i j} ) \le p \]
+\[ \bigwedge_{0 \le \texttt{i} < t} ~ ( \sum_{0 \le \texttt{j} < o} \texttt{Pallets i j} ) \le p \]
 
 Each pallet of object \texttt{o} weighs \texttt{weight[o]} kg. Trucks cannot carry more than the maximum weight of $c$ kg:
-\[ \bigwedge_{0 \le i < t} ~ (\sum_{0 \le j < o} \texttt{Pallets i j} \cdot \texttt{weight[j]}) \le c \]
+\[ \bigwedge_{0 \le \texttt{i} < t} ~ (\sum_{0 \le \texttt{j} < o} \texttt{Pallets i j} \cdot \texttt{weight[j]}) \le c \]
 Prittles and crottles are not allowed in the same truck. In other words, for every truck \texttt{t} it should not be possible that \texttt{(Pallets t prittles)} and \texttt{(Pallets t crottles)} are both greater than 0:
-\[ \bigwedge_{0 \le i < t} \neg \left(( \texttt{Pallets i prittles} > 0) \wedge (\texttt{Pallets i crottles} > 0 )\right)\]
+\[ \bigwedge_{0 \le \texttt{i} < t} \neg \left(( \texttt{Pallets i prittles} > 0) \wedge (\texttt{Pallets i crottles} > 0 )\right)\]
 
 There can be at most 2 trucks carrying skipples. To be able to express this constraint, we first need to count the number of trucks carrying skipples. We introduce a variable \texttt{skt} to count the number of skipple-carrying trucks. We calculate the value of this integer by summing over all trucks \texttt{t} with a simple if-then-else-statement in yices: 
-\[ \texttt{skt} = \sum_{0\le i < t} \texttt{(ite (> (Pallets i skipples) 0) 1 0)}\]
+\[ \texttt{skt} = \sum_{0\le \texttt{i} < t} \texttt{(ite (> (Pallets i skipples) 0) 1 0)}\]
 
 Now we can easily express the constraint by adding the following to our formula:
 \[ \texttt{skt} \le 2 \]
 
 We have to deliver \texttt{amount[o]} pallets of object \texttt{o}. Finally we assert that all pallets in the delivery should be loaded onto the trucks:
 
-\[ \bigwedge_{0 \le i < o} \sum_{0 \le j < t} \texttt{Pallets j o} = \texttt{amount[o]}\]
+\[ \bigwedge_{0 \le \texttt{i} < o} \sum_{0 \le \texttt{j} < t} \texttt{Pallets j o} = \texttt{amount[o]}\]
 
 We fill in a number for \texttt{amount[prittles]} and see if the formule is satisfiable. We use binary search to find the maximum number of pallets of prittles that we can deliver.
 The formula was satisfiable when \texttt{amount[prittles]} was equal to 20.
@@ -119,23 +119,23 @@ If we put these three conditions together, we get:
 
 Now we have a number of job specific constraints. 
 If we want to express that job a is only allowed to start if job b and c have finished, we write: 
-\[ \bigwedge_{0 \le \texttt{tt} < time} (\texttt{Status a tt} = 1) \rightarrow (\texttt{Status b tt} = 2 \wedge \texttt{Status c tt} = 2) \]
+\[ \bigwedge_{0 \le \texttt{tt} < T} (\texttt{Status a tt} = 1) \rightarrow (\texttt{Status b tt} = 2 \wedge \texttt{Status c tt} = 2) \]
 
 Job 3 may only start if job 1 and 2 have finished.
-\[ \bigwedge_{0 \le \texttt{tt} < time} (\texttt{Status 2 tt} = 1) \rightarrow (\texttt{Status 0 tt} = 2 \wedge \texttt{Status 1 tt} = 2) \]
+\[ \bigwedge_{0 \le \texttt{tt} < T} (\texttt{Status 2 tt} = 1) \rightarrow (\texttt{Status 0 tt} = 2 \wedge \texttt{Status 1 tt} = 2) \]
 Job 5 may only start if job 3 and 4 have finished.
-\[ \bigwedge_{0 \le \texttt{tt} < time} (\texttt{Status 4 tt} = 1) \rightarrow (\texttt{Status 2 tt} = 2 \wedge \texttt{Status 3 tt} = 2) \]
+\[ \bigwedge_{0 \le \texttt{tt} < T} (\texttt{Status 4 tt} = 1) \rightarrow (\texttt{Status 2 tt} = 2 \wedge \texttt{Status 3 tt} = 2) \]
 Job 7 may only start if job 3, 4 and 6 have finished.
-\[ \bigwedge_{0 \le \texttt{tt} < time} (\texttt{Status 6 tt} = 1) \rightarrow (\texttt{Status 2 tt} = 2 \wedge \texttt{Status 3 tt} = 2 \wedge \texttt{Status 5 tt} = 2) \]
+\[ \bigwedge_{0 \le \texttt{tt} < T} (\texttt{Status 6 tt} = 1) \rightarrow (\texttt{Status 2 tt} = 2 \wedge \texttt{Status 3 tt} = 2 \wedge \texttt{Status 5 tt} = 2) \]
 Job 9 may only start if job 5 and 8 have finished.
-\[ \bigwedge_{0 \le \texttt{tt} < time} (\texttt{Status 8 tt} = 1) \rightarrow (\texttt{Status 4 tt} = 2 \wedge \texttt{Status 7 tt} = 2) \]
+\[ \bigwedge_{0 \le \texttt{tt} < T} (\texttt{Status 8 tt} = 1) \rightarrow (\texttt{Status 4 tt} = 2 \wedge \texttt{Status 7 tt} = 2) \]
 Job 11 may only start if job 10 has finished.
-\[ \bigwedge_{0 \le \texttt{tt} < time} (\texttt{Status 10 tt} = 1) \rightarrow (\texttt{Status 9 tt} = 2\]
+\[ \bigwedge_{0 \le \texttt{tt} < T} (\texttt{Status 10 tt} = 1) \rightarrow (\texttt{Status 9 tt} = 2\]
 Job 12 may only start if job 9 and 11 have finished.
-\[ \bigwedge_{0 \le \texttt{tt} < time} (\texttt{Status 11 tt} = 1) \rightarrow (\texttt{Status 8 tt} = 2 \wedge \texttt{Status 10 tt} = 2) \]
+\[ \bigwedge_{0 \le \texttt{tt} < T} (\texttt{Status 11 tt} = 1) \rightarrow (\texttt{Status 8 tt} = 2 \wedge \texttt{Status 10 tt} = 2) \]
 
 Another constraint is that job 8 may not start earlier than job 5, in other words, we want that if job 5 starts running, job 8 is either running as well or already finished:
-\[ \bigwedge_{0 \le \texttt{tt} < time} (\texttt{Status 8 tt} = 1) \rightarrow (\texttt{Status 8 tt} > 0) \]
+\[ \bigwedge_{0 \le \texttt{tt} < T} (\texttt{Status 8 tt} = 1) \rightarrow (\texttt{Status 8 tt} > 0) \]
 
 For job 5, 7 and 10 we have that no two of these job may be running at the same time. 
 We introduce a variable $nr_t$ to count the number of running jobs 5, 7 and 10 in timeframe $t$.
@@ -155,14 +155,14 @@ We compute this by fixing the number of steps $T$, and then defining a function
 such that \texttt{A v t} is the value of variable $a_v$ after $t$ steps.
 
 First we define the initial value for all variables:
-\[ \bigwedge_{1 \le v \le N} \texttt{A v 0} = v \]
+\[ \bigwedge_{1 \le \texttt{v} \le N} \texttt{A v 0} = \texttt{v} \]
 Then we define the steps allowed for each variable.
 For the first and last variable we have:
-\[ \bigwedge_{v \in \{1, N\}} \bigwedge_{0 \le t < T} \texttt{A v (t+1)} = \texttt{A v t} \]
+\[ \bigwedge_{\texttt{v} \in \{1, N\}} \bigwedge_{0 \le \texttt{t} < T} \texttt{A v (t+1)} = \texttt{A v t} \]
 For all other variables we have:
-\[ \bigwedge_{1 < v < N} \bigwedge_{0 \le t < T} (\texttt{A v (t+1)} = \texttt{A v t}) \vee (\texttt{A v (t+1)} = \texttt{A (v-1) t} + \texttt{A (v+1) t}) \]
+\[ \bigwedge_{1 < \texttt{v} < N} \bigwedge_{0 \le \texttt{t} < T} (\texttt{A v (t+1)} = \texttt{A v t}) \vee (\texttt{A v (t+1)} = \texttt{A (v-1) t} + \texttt{A (v+1) t}) \]
 Finally we define the end-goal:
-\[ \bigvee_{1 \le v \le N} \texttt{A v T} = 157 \]
+\[ \bigvee_{1 \le \texttt{v} \le N} \texttt{A v T} = 157 \]
 
 To find the minimum number of steps required, we use binary search on the number of steps $T$.
 If for any $T$ the problem is satisfiable, the problem is also satisfiable for $T+1$, because the ``do nothing''-step can always be chosen.
