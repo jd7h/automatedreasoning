@@ -121,27 +121,27 @@ Now we have a number of job specific constraints.
 If we want to express that job a is only allowed to start if job b and c have finished, we write: 
 \[ \bigwedge_{0 \le \texttt{tt} < T} (\texttt{Status a tt} = 1) \rightarrow (\texttt{Status b tt} = 2 \wedge \texttt{Status c tt} = 2) \]
 
-Job 3 may only start if job 1 and 2 have finished.
+Job 2 may only start if job 0 and 1 have finished.
 \[ \bigwedge_{0 \le \texttt{tt} < T} (\texttt{Status 2 tt} = 1) \rightarrow (\texttt{Status 0 tt} = 2 \wedge \texttt{Status 1 tt} = 2) \]
-Job 5 may only start if job 3 and 4 have finished.
+Job 4 may only start if job 2 and 3 have finished.
 \[ \bigwedge_{0 \le \texttt{tt} < T} (\texttt{Status 4 tt} = 1) \rightarrow (\texttt{Status 2 tt} = 2 \wedge \texttt{Status 3 tt} = 2) \]
-Job 7 may only start if job 3, 4 and 6 have finished.
+Job 6 may only start if job 2, 3 and 5 have finished.
 \[ \bigwedge_{0 \le \texttt{tt} < T} (\texttt{Status 6 tt} = 1) \rightarrow (\texttt{Status 2 tt} = 2 \wedge \texttt{Status 3 tt} = 2 \wedge \texttt{Status 5 tt} = 2) \]
-Job 9 may only start if job 5 and 8 have finished.
+Job 8 may only start if job 4 and 7 have finished.
 \[ \bigwedge_{0 \le \texttt{tt} < T} (\texttt{Status 8 tt} = 1) \rightarrow (\texttt{Status 4 tt} = 2 \wedge \texttt{Status 7 tt} = 2) \]
-Job 11 may only start if job 10 has finished.
+Job 10 may only start if job 9 has finished.
 \[ \bigwedge_{0 \le \texttt{tt} < T} (\texttt{Status 10 tt} = 1) \rightarrow (\texttt{Status 9 tt} = 2\]
-Job 12 may only start if job 9 and 11 have finished.
+Job 11 may only start if job 8 and 10 have finished.
 \[ \bigwedge_{0 \le \texttt{tt} < T} (\texttt{Status 11 tt} = 1) \rightarrow (\texttt{Status 8 tt} = 2 \wedge \texttt{Status 10 tt} = 2) \]
 
-Another constraint is that job 8 may not start earlier than job 5, in other words, we want that if job 5 starts running, job 8 is either running as well or already finished:
+Another constraint is that job 7 may not start earlier than job 4, in other words, we want that if job 4 starts running, job 7 is either running as well or already finished:
 \[ \bigwedge_{0 \le \texttt{tt} < T} (\texttt{Status 8 tt} = 1) \rightarrow (\texttt{Status 8 tt} > 0) \]
 
-For job 5, 7 and 10 we have that no two of these job may be running at the same time. 
-We introduce a variable $nr_t$ to count the number of running jobs 5, 7 and 10 in timeframe $t$.
-We calculate the value of this integer by summing over jobs 5,7 and 10 with a simple if-then-else-statement in yices: 
+For job 4, 6 and 9 we have that no two of these job may be running at the same time. 
+We introduce a variable $nr_t$ to count the number of running jobs 4, 6 and 9 in timeframe $t$.
+We calculate the value of this integer by summing over jobs 4, 6 and 9 with a simple if-then-else-statement in yices: 
 \[ nr_t = \sum_{i \in \{4,6,9\}} \texttt{ite (= 1 (Status i t)) 1 0} \]
-Now we can enforce the constraint by counting the number of running jobs 5, 7 and 10 in each timeframe, 
+Now we can enforce the constraint by counting the number of running jobs 4, 6 and 9 in each timeframe, 
 and stating that this number is not allowed to be greater than 1. 
 \[ \bigwedge_{0 \le t < T} nr_t \le 1\]
 
