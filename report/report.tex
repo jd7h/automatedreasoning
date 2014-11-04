@@ -5,6 +5,7 @@
 \usepackage{epic}
 \usepackage{graphicx}
 \usepackage{comment}
+\usepackage{graphicx}
 %\pagestyle{empty}
 \newcommand{\tr}{\mbox{\sf true}}
 \newcommand{\fa}{\mbox{\sf false}}
@@ -144,6 +145,13 @@ We calculate the value of this integer by summing over jobs 4, 6 and 9 with a si
 Now we can enforce the constraint by counting the number of running jobs 4, 6 and 9 in each timeframe, 
 and stating that this number is not allowed to be greater than 1. 
 \[ \bigwedge_{0 \le t < T} nr_t \le 1\]
+
+We filled in a value for the variable time (the length of the timeline) 
+and asked the SMT-solver whether the formule was satisfiable. 
+We used binary search to find the minimal number of time frames needed to schedule all jobs. 
+We found the value 56. 
+Below is a Gant chart that shows us how the jobs were scheduled within 56 time frames:
+\includegraphics[width=15cm]{gantchart.png}
 
 \subsection*{Computation steps}
 The problem: given a set of $N$ variables $a_1, \cdots, a_N$ and their initial value.
