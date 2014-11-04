@@ -21,10 +21,12 @@ Judith van Stegeren\\
 \vspace{8mm}
 
 \subsection*{Trucks and pallets}
-The problem: find a way to load pallets of different objects onto 6 trucks, while adhering to various constraints. Investigate what is the maximum number of pallets of prittles that can be delivered, and show how for that number all pallets may be divided over the six trucks.
+The problem: find a way to load pallets of different objects onto 6 trucks, while adhering to various constraints. 
+Investigate the maximum number of pallets of prittles that can be delivered, 
+and show how for that number all pallets may be divided over the six trucks.
 
 We have generalized the problem in the following way: given $t$ trucks with a capacity of $c$ that can carry at most $p$ pallets, an array \texttt{amount} of numbers of pallets of nuzzles, skipples, crottles and dupples and an array \texttt{weight} of the weight of a pallet of each of these items, maximize the number of pallets of prittles that can be delivered.
-Note that we either use the number `$0$' or the full name `\texttt{nuzzles}' or the single letter `\texttt{n}' to denote the index corresponding to nuzzles.
+Note that throughout the text we use the number `$0$' (the index corresponding to nuzzles), the full object name `\texttt{nuzzles}' or the single letter `\texttt{n}' interchangably, to increase readability.
 
 We start out by introducing our representation. We have a function 
 \[\texttt{Pallets :: Int -> Int -> Int}\]
@@ -51,8 +53,8 @@ We have to deliver \texttt{amount[o]} pallets of object \texttt{o}. Finally we a
 
 \[ \bigwedge_{0 \le i < o} \sum_{0 \le j < t} \texttt{Pallets j o} = \texttt{amount[o]}\]
 
-We use binary search to find the maximum number of pallets of prittles that we can deliver.
-The SMT-solver returned the value 20.
+We fill in a number for \texttt{amount[prittles]} and see if the formule is satisfiable. We use binary search to find the maximum number of pallets of prittles that we can deliver.
+The formula was satisfiable when \texttt{amount[prittles]} was equal to 20.
 We show the assignment found by the solver in figure \ref{fig:sub1table}.
 Since this brings the total amount of delivered pallets to 47 and the maximum number of pallets we can carry with the six trucks is 48, this seems like a plausible solution.
 
