@@ -76,59 +76,66 @@ Since this brings the total amount of delivered pallets to 47 and the maximum nu
 \end{figure}
 
 \subsection*{Scheduling of jobs}
-The problem: schedule twelve jobs with different running times, while adhering to a list of constraints. Investigate the minimal running time needed to complete all jobs.
-Our solution works for a arbitrary number of jobs. We want to schedule $j$ jobs numbered from 1 to $j$. The running time for job $i = i+5$.
-Our representation is as follows. We have a timeline of length \texttt{time}. For every moment in time, we have a status code for every job: it is either ready (0), running (1) or finished (2). 
+The problem: schedule twelve jobs with different running times, while adhering to a list of constraints.
+Investigate the minimal running time needed to complete all jobs.
+Our solution works for a arbitrary number of jobs.
+Contrary to the original assignment, we use 0-indexed jobs instead of 1-indexed jobs.
+We want to schedule $j$ jobs numbered from 0 to $j-1$.
+The running time for job $i$ is $rt_i = i+5+1$.
+
+Our representation is as follows.
+We have a timeline of length $T$.
+For every moment in time, we have a status code for every job: it is either ready (0), running (1) or finished (2). 
 For this we have the function 
 \[\texttt{Status :: Int -> Int -> Int}\]
-\texttt{Status 0 10 2} means that job 1 at timeframe 10 is finished. 
+\texttt{Status 0 10 2} means that job 0 at timeframe 10 is finished. 
 
 The job status must be either 0, 1 or 2, for all jobs and moments in time:
-\[ \bigwedge_{0 \le t < time} \bigwedge_{0 \le i < j} \texttt{Status i t} \ge 0\wedge \texttt{Status i t} \le 2\]
+\[ \bigwedge_{0 \le \texttt{t} < T} ~ \bigwedge_{0 \le \texttt{i} < j} \texttt{Status i t} \ge 0\wedge \texttt{Status i t} \le 2\]
 
 We now want to specify the correct behaviour for each job. 
-Since the running time for each job $i$ is $i+5$ and we want it to be finished before or on timeframe \texttt{time} (the end of the timeline), we have to start job $i$ at timeframe $\texttt{time}-(i+5)$ at the latest.
-We take $st_i$ as the starting time of job $i$, with $0 \le st_i < lt_i$ and $lt_i = \texttt{time}-(i+5)$.
+Since the running time for each job $i$ is $rt_i$ and we want it to be finished before or on timeframe $T-1$ (the end of the timeline), we have to start job $i$ at timeframe $T - rt_i$ at the latest.
+We take $st_i$ as the starting time of job $i$, with $0 \le st_i < lt_i$ and $lt_i = T-rt_i$.
 
 Before a job starts (1), it must be ready (0):
-\[ \bigwedge_{0 \le tt < st_i} \texttt{Status i tt} = 0 \]
+\[ \bigwedge_{0 \le \texttt{tt} < st_i} \texttt{Status i tt} = 0 \]
 
 We want the jobs to run without interrupt.
 In other words, if a job has started, it will not stop until it is finished. 
-If job $i$ starts at timeframe $st_i$, it keeps running in timeframes $st_i \dots st_i + i + 5$.
-\[ \bigwedge_{0 \le rt < i+5} \texttt{Status i (st+rt)} = 1 \]
+If job $i$ starts at timeframe $st_i$, it keeps running in timeframes $st_i \dots (st_i + rt_i)$.
+\[ \bigwedge_{0 \le \texttt{rt} < rt_i} \texttt{Status i (st+rt)} = 1 \]
 
-If the job is done running, it is finished and it will stay finished for the remainder of the timeframes, starting at timeframe $st_i + i + 5$.
-\[ \bigwedge_{0 \le tt < time-st-i-5} \texttt{Status i tt} = 2 \]
+If the job is done running, it is finished and it will stay finished for the remainder of the timeframes, starting at timeframe $st_i + rt_i$.
+\[ \bigwedge_{0 \le \texttt{tt} < T-st-rt_i} \texttt{Status i tt} = 2 \]
 
 If we put these three conditions together, we get:
 \[ \begin{array}{rll}
-    \bigwedge_{0 \le i < j} \bigvee_{0 \le st < lt_i} \left( \right.&& \\
-    & \bigwedge_{0 \le tt < st} & \texttt{Status i tt} = 0 ~ \wedge \\
-    & \bigwedge_{0 \le tt < i+5} & \texttt{Status i st+tt} = 1 ~ \wedge \\
-    & \bigwedge_{0 \le tt < time-st-i-5} & \texttt{Status i tt} = 2 \\
+    \bigwedge_{0 \le \texttt{i} < j} \bigvee_{0 \le \texttt{st} < lt_i} \left( \right.&& \\
+    & \bigwedge_{0 \le \texttt{tt} < st} & \texttt{Status i tt} = 0 ~ \wedge \\
+    & \bigwedge_{0 \le \texttt{tt} < rt_i} & \texttt{Status i st+tt} = 1 ~ \wedge \\
+    & \bigwedge_{0 \le \texttt{tt} < T-st-rt_i} & \texttt{Status i tt} = 2 \\
 \left. \right)
 \end{array} \]
 
 Now we have a number of job specific constraints. 
 If we want to express that job a is only allowed to start if job b and c have finished, we write: 
-\[ \bigwedge_{0 \le tt < time} (\texttt{Status a tt} = 1) \rightarrow (\texttt{Status b tt} = 2 \wedge \texttt{Status c tt} = 2) \]
+\[ \bigwedge_{0 \le \texttt{tt} < time} (\texttt{Status a tt} = 1) \rightarrow (\texttt{Status b tt} = 2 \wedge \texttt{Status c tt} = 2) \]
 
 Job 3 may only start if job 1 and 2 have finished.
-\[ \bigwedge_{0 \le tt < time} (\texttt{Status 2 tt} = 1) \rightarrow (\texttt{Status 0 tt} = 2 \wedge \texttt{Status 1 tt} = 2) \]
+\[ \bigwedge_{0 \le \texttt{tt} < time} (\texttt{Status 2 tt} = 1) \rightarrow (\texttt{Status 0 tt} = 2 \wedge \texttt{Status 1 tt} = 2) \]
 Job 5 may only start if job 3 and 4 have finished.
-\[ \bigwedge_{0 \le tt < time} (\texttt{Status 4 tt} = 1) \rightarrow (\texttt{Status 2 tt} = 2 \wedge \texttt{Status 3 tt} = 2) \]
+\[ \bigwedge_{0 \le \texttt{tt} < time} (\texttt{Status 4 tt} = 1) \rightarrow (\texttt{Status 2 tt} = 2 \wedge \texttt{Status 3 tt} = 2) \]
 Job 7 may only start if job 3, 4 and 6 have finished.
-\[ \bigwedge_{0 \le tt < time} (\texttt{Status 6 tt} = 1) \rightarrow (\texttt{Status 2 tt} = 2 \wedge \texttt{Status 3 tt} = 2 \wedge \texttt{Status 5 tt} = 2) \]
+\[ \bigwedge_{0 \le \texttt{tt} < time} (\texttt{Status 6 tt} = 1) \rightarrow (\texttt{Status 2 tt} = 2 \wedge \texttt{Status 3 tt} = 2 \wedge \texttt{Status 5 tt} = 2) \]
 Job 9 may only start if job 5 and 8 have finished.
-\[ \bigwedge_{0 \le tt < time} (\texttt{Status 8 tt} = 1) \rightarrow (\texttt{Status 4 tt} = 2 \wedge \texttt{Status 7 tt} = 2) \]
+\[ \bigwedge_{0 \le \texttt{tt} < time} (\texttt{Status 8 tt} = 1) \rightarrow (\texttt{Status 4 tt} = 2 \wedge \texttt{Status 7 tt} = 2) \]
 Job 11 may only start if job 10 has finished.
-\[ \bigwedge_{0 \le tt < time} (\texttt{Status 10 tt} = 1) \rightarrow (\texttt{Status 9 tt} = 2\]
+\[ \bigwedge_{0 \le \texttt{tt} < time} (\texttt{Status 10 tt} = 1) \rightarrow (\texttt{Status 9 tt} = 2\]
 Job 12 may only start if job 9 and 11 have finished.
-\[ \bigwedge_{0 \le tt < time} (\texttt{Status 11 tt} = 1) \rightarrow (\texttt{Status 8 tt} = 2 \wedge \texttt{Status 10 tt} = 2) \]
+\[ \bigwedge_{0 \le \texttt{tt} < time} (\texttt{Status 11 tt} = 1) \rightarrow (\texttt{Status 8 tt} = 2 \wedge \texttt{Status 10 tt} = 2) \]
 
 Another constraint is that job 8 may not start earlier than job 5, in other words, we want that if job 5 starts running, job 8 is either running as well or already finished:
-\[ \bigwedge_{0 \le tt < time} (\texttt{Status 8 tt} = 1) \rightarrow (\texttt{Status 8 tt} > 0) \]
+\[ \bigwedge_{0 \le \texttt{tt} < time} (\texttt{Status 8 tt} = 1) \rightarrow (\texttt{Status 8 tt} > 0) \]
 
 For job 5, 7 and 10 we have that no two of these job may be running at the same time. 
 We introduce a variable $nr_t$ to count the number of running jobs 5, 7 and 10 in timeframe $t$.
@@ -136,7 +143,7 @@ We calculate the value of this integer by summing over jobs 5,7 and 10 with a si
 \[ nr_t = \sum_{i \in \{4,6,9\}} \texttt{ite (= 1 (Status i t)) 1 0} \]
 Now we can enforce the constraint by counting the number of running jobs 5, 7 and 10 in each timeframe, 
 and stating that this number is not allowed to be greater than 1. 
-\[ \bigwedge_{0 \le t < time} nr_t \le 1\]
+\[ \bigwedge_{0 \le t < T} nr_t \le 1\]
 
 \subsection*{Computation steps}
 The problem: given a set of $N$ variables $a_1, \cdots, a_N$ and their initial value.
