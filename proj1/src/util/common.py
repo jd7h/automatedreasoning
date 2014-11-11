@@ -23,3 +23,6 @@ def try_prog(prog_str):
         tmp_f.flush()
         result = run_command("./yices_main %s" % tmp_f.name, 3600000)
         return result[1].find("unsat") is -1, result[1]
+
+def onerange(n):
+    return [x+1 for x in range(n)]

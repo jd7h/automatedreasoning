@@ -1,6 +1,7 @@
 import sys
 
 from util.common import try_prog
+from util.common import onerange
 
 def genProg(time):
     def runtime(i):
@@ -14,16 +15,14 @@ def genProg(time):
     
     # Job status is {0,1,2}
     result += "(assert (and "
-    for j in range(job_num):
-        j = j+1 # 1-indexed
+    for j in onerange(job_num):
         for t in range(time):
             result += "(>= (Status %d %d) 0) (<= (Status %d %d) 2) " % (j, t, j, t)
     result += "))\n"
     
     #the running time of job j is j+5
     result += "(assert (and \n"
-    for j in range(job_num):
-        j = j+1 # 1-indexed
+    for j in onerange(job_num):
         r = runtime(j)
         result += "(or \n"
         for t in range(time - r + 1):
