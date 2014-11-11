@@ -1,6 +1,7 @@
 import sys
 
 from util.common import try_prog
+from util.common import onerange
 
 def genProg(steps_num):
     result = ""
@@ -12,24 +13,33 @@ def genProg(steps_num):
     
     # The initial value of a_i is i (1-indexed)
     result += "(assert (and "
-    for v in range(var_num):
+    for v in onerange(var_num):
         result += "(= (A %d 0) %d) " % (v, v+1)
     result += "))\n"
     
+    # 
     result += "(assert (and "
-    for v in range(var_num):
-        for t in range(steps_num):
-            if v > 0 and v < var_num-1:
-                result += "(or "
-                result += "(= (A %d %d) (A %d %d))" % (v, t+1, v, t)
+    for t in range(steps_num):
+        result += "(or "
+        for v in onerange(var_num):
+            if v > 1 and v < var_num:
+                result += "(and "
+                
+                # The chosen one to take a step
                 result += "(= (A %d %d) (+ (A %d %d) (A %d %d))) " % (v, t+1, v-1, t, v+1, t)
-                result += ") "
-            else:
-                result += "(= (A %d %d) (A %d %d))" % (v, t+1, v, t)
+                
+                # The rest must stay immutable
+                for u in onerange(var_num):
+                    if v is u:
+                        continue
+                    result += "(= (A %d %d) (A %d %d))" % (u, t+1, u, t)
+                
+                result += ")"
+        result += ")"
     result += "))\n"
     
     result += "(assert (or "
-    for v in range(var_num):
+    for v in onerange(var_num):
         result += "(= (A %d %d) %d)" % (v, steps_num, goal)
     result += "))\n"
     
@@ -41,7 +51,7 @@ def genProg(steps_num):
 
 def search_sat_prog():
     lowerbound = 1
-    upperbound = 10
+    upperbound = 50
     last_success_output = None
     
     while lowerbound != upperbound:
@@ -62,7 +72,8 @@ def search_sat_prog():
     
 
 def main():
-    #prog_str = genProg(15)
+    #prog_str = genProg(3)
+    #print prog_str
     #print try_prog(prog_str)[1]
     
     search_sat_prog()
