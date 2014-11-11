@@ -164,10 +164,21 @@ such that \texttt{A v t} is the value of variable $a_v$ after $t$ steps.
 First we define the initial value for all variables:
 \[ \bigwedge_{1 \le \texttt{v} \le N} \texttt{A v 0} = \texttt{v} \]
 Then we define the steps allowed for each variable.
-For the first and last variable we have:
-\[ \bigwedge_{\texttt{v} \in \{1, N\}} \bigwedge_{0 \le \texttt{t} < T} \texttt{A v (t+1)} = \texttt{A v t} \]
-For all other variables we have:
-\[ \bigwedge_{1 < \texttt{v} < N} \bigwedge_{0 \le \texttt{t} < T} (\texttt{A v (t+1)} = \texttt{A v t}) \vee (\texttt{A v (t+1)} = \texttt{A (v-1) t} + \texttt{A (v+1) t}) \]
+The $t^\mathtt{th}$ step can be done by precisely one variable $a_v$ in $\{ a_2, \cdots, a_{N-1} \}$.
+This step is done by updating this variable:
+\[\texttt{A v (t+1)} = \texttt{A (v-1) t} + \texttt{A (v+1) t}\]
+And all other variables must remain unchanged:
+\[\bigwedge_{ \texttt{u} \in \{1, \cdots, N\} \setminus \{ \texttt{v} \} } \texttt{A u (t+1)} = \texttt{A u t}\]
+
+This can be done for any step $t$, thus this entire section can be written down with:
+\[
+    \bigwedge_{0 \le \texttt{t} < T}
+    \bigvee_{1 < \texttt{v} < N}
+        \left (\texttt{A v (t+1)} = \texttt{A (v-1) t} + \texttt{A (v+1) t} \right)
+        ~\wedge~
+        \left( \bigwedge_{ \texttt{u} \in \{1, \cdots, N\} \setminus \{ \texttt{v} \} } \texttt{A u (t+1)} = \texttt{A u t} \right)
+\]
+
 Finally we define the end-goal:
 \[ \bigvee_{1 \le \texttt{v} \le N} \texttt{A v T} = 157 \]
 
@@ -175,6 +186,6 @@ To find the minimum number of steps required, we use binary search on the number
 If for any $T$ the problem is satisfiable, the problem is also satisfiable for $T+1$, because the ``do nothing''-step can always be chosen.
 Thus binary search is applicable in this case.
 
-Our algorithm for binary search concludes that the problem can be solved in at least 6 steps.
+Our algorithm for binary search concludes that the problem can be solved in at least 11 steps.
 
 \end{document}
