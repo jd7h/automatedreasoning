@@ -14,10 +14,10 @@ def genProg(steps_num):
     # The initial value of a_i is i (1-indexed)
     result += "(assert (and "
     for v in onerange(var_num):
-        result += "(= (A %d 0) %d) " % (v, v+1)
+        result += "(= (A %d 0) %d) " % (v, v)
     result += "))\n"
     
-    # 
+    # For every timeframe we can do a single step
     result += "(assert (and "
     for t in range(steps_num):
         result += "(or "
