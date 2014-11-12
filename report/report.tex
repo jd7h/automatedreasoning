@@ -183,7 +183,8 @@ Finally we define the end-goal:
 \[ \bigvee_{1 \le \texttt{v} \le N} \texttt{A v T} = 157 \]
 
 To find the minimum number of steps required, we use binary search on the number of steps $T$.
-If for any $T$ the problem is satisfiable, the problem is also satisfiable for $T+1$, because the ``do nothing''-step can always be chosen.
+Because when a variable $v$ has reached the value 157 after $T$ steps, in subsequent steps, the SMT-solver can always pick a variable that does not have the value 157.
+Since the value of variable $v$ then remains unchanged, the formula is also satisfiable for more than $T$ steps.
 Thus binary search is applicable in this case.
 
 Our algorithm for binary search concludes that the problem can be solved in at least 10 steps.
