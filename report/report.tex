@@ -153,10 +153,12 @@ Below is a Gant chart that shows us how the jobs were scheduled within 59 time f
 \includegraphics[width=15cm]{gantchart.png}
 
 \subsection*{Computation steps}
-The problem: given a set of $N$ variables $a_1, \cdots, a_N$ and their initial value.
-For all variables except $a_1$ and $a_N$, it is possible to either do nothing, or assign a new value to the variable:
+We start with a set of $N$ variables $a_1, \dots, a_N$ with initial values $1 \dots N$.
+%For all variables except $a_1$ and $a_N$, it is possible to either do nothing, or assign a new value to the variable:
+We want to obtain a variable with the value 157 in a number of steps. 
+In such a step, we choose a variable $a_v$ with $1 < v < N$ and assign it a new value:
 \[ a_v = a_{v-1} + a_{v+1} \]
-We need to find the minimum number of steps required for any of these variables to attain the value 157.
+We want to find the minimum number of these steps required to get a variable with the value 157.
 We compute this by fixing the number of steps $T$, and then defining a function
 \[\texttt{A :: Int -> Int -> Int}\]
 such that \texttt{A v t} is the value of variable $a_v$ after $t$ steps.
@@ -182,10 +184,17 @@ This can be done for any step $t$, thus this entire section can be written down 
 Finally we define the end-goal:
 \[ \bigvee_{1 \le \texttt{v} \le N} \texttt{A v T} = 157 \]
 
-To find the minimum number of steps required, we use binary search on the number of steps $T$.
-Because when a variable $v$ has reached the value 157 after $T$ steps, in subsequent steps, the SMT-solver can always pick a variable that does not have the value 157.
-Since the value of variable $v$ then remains unchanged, the formula is also satisfiable for more than $T$ steps.
-Thus binary search is applicable in this case.
+%To find the minimum number of steps required, we use binary search on the number of steps $T$.
+To minimize the number of steps, we use binary search on $T$.
+Binary search is applicable because of the following:
+if a variable $a_v$ has the value 157 after $t$ steps, the SMT-solver can pick a variable $a_w$ with $v \ne w$ for all subsequent steps.
+In other words, 
+if the SMT-solver finds that the formula is satisfiable for t steps, 
+the formula is also satisfiable for a larger number of steps.
+
+%Because when a variable $v$ has reachbed the value 157 after $T$ steps, in subsequent steps, the SMT-solver can always pick a variable that does not have the value 157.
+%Since the value of variable $v$ then remains unchanged, the formula is also satisfiable for more than $T$ steps.
+%Thus binary search is applicable in this case.
 
 Our algorithm for binary search concludes that the problem can be solved in at least 10 steps.
 
