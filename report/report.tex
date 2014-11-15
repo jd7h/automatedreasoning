@@ -3,6 +3,7 @@
 \usepackage{latexsym}
 \usepackage{amssymb}
 \usepackage{epic}
+\usepackage{amsmath}
 \usepackage{graphicx}
 \usepackage{comment}
 \usepackage{graphicx}
@@ -75,6 +76,48 @@ Since this brings the total amount of delivered pallets to 47 and the maximum nu
     \caption{Assignment of pallets to trucks for an optimal solution.}
     \label{fig:sub1table}
 \end{figure}
+
+\subsection*{Rectangles and squares}
+The problem: we have a list of $n$ shapes (rectangles and squares) 
+$s_1\dots s_n$ of dimensions width$(s_i)$ and height$(s_i)$.
+%of width \texttt{W(s_i)} and height \texttt{H(s_i)}.
+We also have a large square of width $b$.% and height \texttt{bound_y}. 
+We want to find a way to place all shapes within the bounding square 
+without any shape overlapping the other.
+
+We start out by defining 4 functions. 
+We need these for our representation.
+
+\begin{enumerate}
+\item the function \texttt{W :: Int -> Int} that returns the width of a shape.
+\item the function \texttt{H :: Int -> Int}  that returns the height of a shape.
+\item the function \texttt{X :: Int -> Int} that returns the x-coordinate of the upper-left-point of a shape.
+\item the function \texttt{Y :: Int -> Int} that returns the y-coordinate of the upper-left-point of a shape.
+\end{enumerate}
+
+We need \texttt{W} and \texttt{H} to define the actual size of all shapes,
+and \texttt{X} and \texttt{Y} to represent where the shapes are placed in the big square.
+
+The first thing we have to put in the formula, is that all shapes can be placed either horizontally or vertically in the square.
+In other words, for all shapes we have that either 
+\texttt{W(i)} = width$(s_i)$ and \texttt{H(i)} = height$(s_i)$ or 
+\texttt{W(i)} = height($s_i)$ and \texttt{W(i)} = width($s_i)$:
+
+\[ \bigwedge_{1<i<n} 
+\texttt{W(i)} = \text{width}(s_i) \wedge \texttt{H(i)} = \text{height}(s_i) \oplus
+\texttt{W(i)} = \text{height}(s_i) \wedge \texttt{W(i)} = \text{width}(s_i)
+\]
+
+Furthermore, all shapes must stay within the bounds of the big square, ie. their X and Y coordinates must be somewhere between 0 and $b$.
+
+\[ \bigwedge_{1<i<n}
+\texttt{X(i)} >= 0 \wedge
+\texttt{Y(i)} >= 0 \wedge
+\texttt{X(i)}+\texttt{W(i)} <= b \wedge
+\texttt{Y(i)}+\texttt{H(i)} <= b
+\]
+
+We also don't want any of the shapes to overlap. 
 
 \subsection*{Scheduling of jobs}
 The problem: schedule twelve jobs with different running times, while adhering to a list of constraints.
