@@ -200,12 +200,13 @@ If the SMT-solver then tells us that the formula is unsatisfiable, we know that 
 %(NOT 8 and 9 placed in parallel OR NOT NOT all rectangled in parallel )
 
 The rectangles with length 8 and 9 are placed in parallel, 
-ie. they are either both placed horizontally or vertically:\\
-(\texttt{(W 8)} = 8 $\wedge$ \texttt{(H 8)} = 1 $\wedge$
-\texttt{(W 9)} = 9 $\wedge$ \texttt{(H 9)} = 1)
-$\vee$\\
-(\texttt{(W 8)} = 1 $\wedge$ \texttt{(H 8)} = 8 $\wedge$
-\texttt{(W 9)} = 1 $\wedge$ \texttt{(H 9)} = 9)\\
+ie. they are either both placed horizontally or vertically:
+\[
+    \begin{array}{rlcl}
+    & (\texttt{(W 8)} = 8 \wedge \texttt{(H 8)} = 1 & \wedge & \texttt{(W 9)} = 9 \wedge \texttt{(H 9)} = 1) \\
+    \vee & (\texttt{(W 8)} = 1 \wedge \texttt{(H 8)} = 8 & \wedge & \texttt{(W 9)} = 1 \wedge \texttt{(H 9)} = 9)
+    \end{array}
+\]
 
 Not all non-square rectangles are placed in parallel, ie. it is not the case that they are either all placed horizontally or all placed vertically:
 \[
