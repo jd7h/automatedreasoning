@@ -7,6 +7,7 @@
 \usepackage{graphicx}
 \usepackage{comment}
 \usepackage{graphicx}
+\usepackage{tikz}
 %\pagestyle{empty}
 \newcommand{\tr}{\mbox{\sf true}}
 \newcommand{\fa}{\mbox{\sf false}}
@@ -147,10 +148,14 @@ We then define overlap as the symmetric inclusion relation:
 
 However, this overlap relation does not work as we would like.
 For example, if a big square is covered by a rectangle like this:
+\begin{center}
+\begin{tikzpicture}[>=latex]
+\draw[fill=red] (1,0) rectangle (5,4);
+\draw[fill=blue] (0,2) rectangle (6,3);
+\end{tikzpicture}
+\end{center}
 
-\textbf{TODO 6x6 \& 1x8-voorbeeld}
-
-We clearly see that there is overlap, but the two objects are not included.
+We clearly see that there is overlap, but the two objects do not include eachother as defined in our inclusion relation.
 The overlap relation can be fixed by requiring a symmetric one-dimensional inclusion relation:
 \[ s_i \bowtie s_j \iff (s_i \in_{\texttt{X}} s_j ~\vee~ s_j \in_{\texttt{X}} s_i) \wedge (s_i \in_{\texttt{Y}} s_j ~\vee~ s_j \in_{\texttt{Y}} s_i) \]
 The `no overlap' constraint can then be formulated as:
