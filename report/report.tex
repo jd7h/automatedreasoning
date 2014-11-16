@@ -199,28 +199,34 @@ If the SMT-solver then tells us that the formula is unsatisfiable, we know that 
 %NOT ( 8 and 9 placed in parallel AND not all rectangles in parallel )
 %(NOT 8 and 9 placed in parallel OR NOT NOT all rectangled in parallel )
 
-The rectangles with length 8 and 9 are placed in parallel, ie. they are either both placed horizontally or vertically:
-(\texttt{(W 8)} = width($s_8) \wedge$ \texttt{(H 8)} = height($s_8) \wedge$
-\texttt{(W 9)} = width($s_9) \wedge$ \texttt{(H 9)} = height($s_9))
-\vee$\\
-(\texttt{(W 8)} = height($s_8) \wedge$ \texttt{(H 8)} = width($s_8) \wedge$
-\texttt{(W 9)} = height($s_9) \wedge$ \texttt{(H 9)} = width($s_9$))\\
+The rectangles with length 8 and 9 are placed in parallel, 
+ie. they are either both placed horizontally or vertically:\\
+(\texttt{(W 8)} = 8 $\wedge$ \texttt{(H 8)} = 1 $\wedge$
+\texttt{(W 9)} = 9 $\wedge$ \texttt{(H 9)} = 1)
+$\vee$\\
+(\texttt{(W 8)} = 1 $\wedge$ \texttt{(H 8)} = 8 $\wedge$
+\texttt{(W 9)} = 1 $\wedge$ \texttt{(H 9)} = 9)\\
 
 Not all non-square rectangles are placed in parallel, ie. it is not the case that they are either all placed horizontally or all placed vertically:
 \[
 \neg
 \left(
-\bigvee_{2 \le i \le 9}
+\bigwedge_{2 \le i \le 9}
 \left( 
 \texttt{(W i)} = \text{width}(s_i) \wedge \texttt{(H i)} = \texttt{height}(s_i)
 \right)
 \oplus
-\bigvee_{2 \le i \le 9}
+\bigwedge_{2 \le i \le 9}
 \left(
 \texttt{(W i)} = \text{height}(s_i) \wedge \texttt{(H i)} = \text{width}(s_i)
 \right)
 \right)
 \]
+
+Then we take the negation of the conjuction of these two parts and add them to the formula.
+
+The SMT-solver found that if we add that statement, the formula is unsatisfiable. 
+
 
 \subsection*{Scheduling of jobs}
 The problem: schedule twelve jobs with different running times, while adhering to a list of constraints.
