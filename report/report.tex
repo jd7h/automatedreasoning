@@ -200,8 +200,8 @@ If the SMT-solver then tells us that the formula is unsatisfiable, we know that 
 %NOT ( 8 and 9 placed in parallel AND not all rectangles in parallel )
 %(NOT 8 and 9 placed in parallel OR NOT NOT all rectangled in parallel )
 
-The rectangles with length 8 and 9 are placed in parallel, 
-ie. they are either both placed horizontally or vertically:
+The first part of the statement is that the rectangles with length 8 and 9 are placed in parallel, 
+ie. they are either both placed horizontally or vertically:\\
 \[
     \begin{array}{rlcl}
     & (\texttt{(W 8)} = 8 \wedge \texttt{(H 8)} = 1 & \wedge & \texttt{(W 9)} = 9 \wedge \texttt{(H 9)} = 1) \\
@@ -209,7 +209,9 @@ ie. they are either both placed horizontally or vertically:
     \end{array}
 \]
 
-Not all non-square rectangles are placed in parallel, ie. it is not the case that they are either all placed horizontally or all placed vertically:
+The second part of the statement is that 
+not all non-square rectangles are placed in parallel, 
+ie. it is not the case that they are either all placed horizontally or all placed vertically:
 \[
 \neg
 \left(
@@ -227,7 +229,7 @@ Not all non-square rectangles are placed in parallel, ie. it is not the case tha
 
 Then we take the negation of the conjuction of these two parts and add them to the formula.
 
-The SMT-solver found that if we add that statement, the formula is unsatisfiable. 
+The SMT-solver found that if we add that statement, the formula is unsatisfiable, which means that if we have a solution to the original formula, it must be the case that the rectangles of length 8 and 9 are placed in parallel but not all non-square rectangles are placed in parallel.
 
 
 \subsection*{Scheduling of jobs}
