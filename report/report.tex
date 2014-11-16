@@ -123,6 +123,7 @@ Furthermore, all shapes must stay within the bounds of the big square, ie. their
 We also don't want any of the shapes to overlap.
 In order to check whether two shapes $s_i$ and $s_j$ overlap, we first define an inclusion-relation:
 \[ s_i \in s_j \]
+In the following illustrations, we denote $s_i$ with the thick line, and $s_j$ with a dotted line.
 On the X-axis, $s_j$ is (partially) included in shape $s_i$, in other words $s_i \in_{\texttt{X}} s_j$, iff either:
 
 % X_i <= X_j && X_j < X_i + W_i
@@ -137,7 +138,7 @@ or
 \end{center}
 \[ (\texttt{X i}) < (\texttt{X j}) + (\texttt{W j}) ~\wedge~ (\texttt{X j}) + (\texttt{W j}) \le (\texttt{X i}) + (\texttt{W i}) \]
 
-The same relation holds for the Y-axis, thus $s_i \in_{\texttt{Y}} s_j$, when all $\texttt{X}$ variables are replaced by $\texttt{Y}$ variables.
+The same relation holds for the Y-axis, thus $s_i \in_{\texttt{Y}} s_j$, when in the previous definition we replace all $\texttt{X}$ by $\texttt{Y}$ and $\texttt{W}$ by $\texttt{H}$.
 The inclusion relation for two dimensions holds iff both formulas for both axis hold at the same time.
 
 \[ s_i \in_{\texttt{XY}} s_j \iff s_i \in_{\texttt{X}} s_j \wedge s_i \in_{\texttt{Y}} s_j \]
