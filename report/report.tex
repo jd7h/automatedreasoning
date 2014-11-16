@@ -284,7 +284,7 @@ Job 7 may only start if job 3, 4 and 6 have finished.
 Job 9 may only start if job 5 and 8 have finished.
 \[ \bigwedge_{0 \le \texttt{tt} < T} (\texttt{Status 9 tt} = 1) \rightarrow (\texttt{Status 5 tt} = 2 \wedge \texttt{Status 8 tt} = 2) \]
 Job 11 may only start if job 10 has finished.
-\[ \bigwedge_{0 \le \texttt{tt} < T} (\texttt{Status 11 tt} = 1) \rightarrow (\texttt{Status 10 tt} = 2\]
+\[ \bigwedge_{0 \le \texttt{tt} < T} (\texttt{Status 11 tt} = 1) \rightarrow (\texttt{Status 10 tt} = 2) \]
 Job 12 may only start if job 9 and 11 have finished.
 \[ \bigwedge_{0 \le \texttt{tt} < T} (\texttt{Status 12 tt} = 1) \rightarrow (\texttt{Status 9 tt} = 2 \wedge \texttt{Status 11 tt} = 2) \]
 
@@ -303,7 +303,7 @@ We filled in a value for the variable time (the length of the timeline)
 and asked the SMT-solver whether the formule was satisfiable. 
 We used binary search to find the minimal number of time frames needed to schedule all jobs. 
 We found the value 59. 
-Below is a Gant chart that shows us how the jobs were scheduled within 59 time frames:
+Below is a Gantt chart that shows us how the jobs were scheduled within 59 time frames:
 \includegraphics[width=15cm]{gantchart.png}
 
 \subsection*{Computation steps}
