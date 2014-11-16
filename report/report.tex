@@ -156,8 +156,8 @@ For example, if a big square is covered by a rectangle like this:
 \end{tikzpicture}
 \end{center}
 
-We clearly see that there is overlap, but the two objects do not include eachother as defined in our inclusion relation.
-The overlap relation can be fixed by requiring a symmetric one-dimensional inclusion relation:
+We clearly see that there is overlap, but the two objects do not include each other as defined in our inclusion relation.
+We repair the overlap relation by no longer requiring strict inclusion, and using the following definition instead:
 \[ s_i \bowtie s_j \iff (s_i \in_{\texttt{X}} s_j ~\vee~ s_j \in_{\texttt{X}} s_i) \wedge (s_i \in_{\texttt{Y}} s_j ~\vee~ s_j \in_{\texttt{Y}} s_i) \]
 The `no overlap' constraint can then be formulated as:
 \[ \neg \bigvee_{0 \le i < n} ~ \bigvee_{0 \le j < i} s_i \bowtie s_j \]
