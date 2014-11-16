@@ -79,7 +79,7 @@ Since this brings the total amount of delivered pallets to 47 and the maximum nu
 
 \subsection*{Rectangles and squares}
 The problem: we have a list of $n$ shapes (rectangles and squares) 
-$s_0\dots s_n-1$ of dimensions width$(s_i)$ and height$(s_i)$.
+$s_0\dots s_{n-1}$ of dimensions width$(s_i)$ and height$(s_i)$.
 %of width \texttt{W(s_i)} and height \texttt{H(s_i)}.
 We also have a large square of width $b$.% and height \texttt{bound_y}. 
 We want to find a way to place all shapes within the bounding square 
@@ -124,12 +124,17 @@ In order to check whether two shapes $s_i$ and $s_j$ overlap, we first define an
 \[ s_i \in s_j \]
 On the X-axis, $s_j$ is (partially) included in shape $s_i$, in other words $s_i \in_{\texttt{X}} s_j$, iff either:
 
-\begin{itemize}
-    % X_i <= X_j && X_j < X_i + W_i
-    \item $ (\texttt{X i}) \le (\texttt{X j}) ~\wedge~ (\texttt{X j}) < (\texttt{X i}) + (\texttt{W i}) $
-    % X_i < X_j + W_j && X_j + W_j <= X_i + W_i
-    \item $ (\texttt{X i}) < (\texttt{X j}) + (\texttt{W j}) ~\wedge~ (\texttt{X j}) + (\texttt{W j}) \le (\texttt{X i}) + (\texttt{W i}) $
-\end{itemize}
+% X_i <= X_j && X_j < X_i + W_i
+\begin{center}
+    \includegraphics[width=5cm]{bounds1.png}
+\end{center}
+\[ (\texttt{X i}) \le (\texttt{X j}) ~\wedge~ (\texttt{X j}) < (\texttt{X i}) + (\texttt{W i}) \]
+or
+% X_i < X_j + W_j && X_j + W_j <= X_i + W_i
+\begin{center}
+    \includegraphics[width=5cm]{bounds2.png}
+\end{center}
+\[ (\texttt{X i}) < (\texttt{X j}) + (\texttt{W j}) ~\wedge~ (\texttt{X j}) + (\texttt{W j}) \le (\texttt{X i}) + (\texttt{W i}) \]
 
 The same relation holds for the Y-axis, thus $s_i \in_{\texttt{Y}} s_j$, when all $\texttt{X}$ variables are replaced by $\texttt{Y}$ variables.
 The inclusion relation for two dimensions holds iff both formulas for both axis hold at the same time.
@@ -138,7 +143,7 @@ The inclusion relation for two dimensions holds iff both formulas for both axis 
 
 We then define overlap as the symmetric inclusion relation:
 
-\[ s_i \approx s_j \iff s_i \in_{\texttt{XY}} s_j ~\vee~ s_j \in_{\texttt{XY}} s_i \]
+\[ s_i \bowtie s_j \iff s_i \in_{\texttt{XY}} s_j ~\vee~ s_j \in_{\texttt{XY}} s_i \]
 
 However, this overlap relation does not work as we would like.
 For example, if a big square is covered by a rectangle like this:
@@ -146,17 +151,34 @@ For example, if a big square is covered by a rectangle like this:
 \textbf{TODO 6x6 \& 1x8-voorbeeld}
 
 We clearly see that there is overlap, but the two objects are not included.
-The overlap relation can be fixed by first making the one-dimensional relation symmetric:
-\[ s_i \approx s_j \iff (s_i \in_{\texttt{X}} s_j ~\vee~ s_j \in_{\texttt{X}} s_i) \wedge (s_i \in_{\texttt{Y}} s_j ~\vee~ s_j \in_{\texttt{Y}} s_i) \]
+The overlap relation can be fixed by requiring a symmetric one-dimensional inclusion relation:
+\[ s_i \bowtie s_j \iff (s_i \in_{\texttt{X}} s_j ~\vee~ s_j \in_{\texttt{X}} s_i) \wedge (s_i \in_{\texttt{Y}} s_j ~\vee~ s_j \in_{\texttt{Y}} s_i) \]
+The `no overlap' constraint can then be formulated as:
+\[ \neg \bigvee_{0 \le i < n} ~ \bigvee_{0 \le j < i} s_i \bowtie s_j \]
+As the relation is symmetric, we only need to check half of the pairs of shapes.
+Every shape also overlaps with itself, so we exclude the reflexive pairs of shapes as well.
 
-
+We get the following pseudo-Yices after expanding these definitions:
+\[
+    \begin{array}{rlcl}
+        \neg \bigvee_{0 \le i < n} ~ \bigvee_{0 \le j < i} & & & \\
+            (~~~ & (~(\texttt{X i}) \le (\texttt{X j}) & \wedge & (\texttt{X j}) < (\texttt{X i}) + (\texttt{W i}) ) \\
+            \vee & (~(\texttt{X i}) < (\texttt{X j}) + (\texttt{W j}) & \wedge & (\texttt{X j}) + (\texttt{W j}) \le (\texttt{X i}) + (\texttt{W i})~) \\
+            \vee & (~(\texttt{X j}) \le (\texttt{X i}) & \wedge & (\texttt{X i}) < (\texttt{X j}) + (\texttt{W j}) ) \\
+            \vee & (~(\texttt{X j}) < (\texttt{X i}) + (\texttt{W i}) & \wedge & (\texttt{X i}) + (\texttt{W i}) \le (\texttt{X j}) + (\texttt{W j})~) \\
+            )~~~ & & & \\
+     \wedge~(~~~ & (~(\texttt{Y i}) \le (\texttt{Y j}) & \wedge & (\texttt{Y j}) < (\texttt{Y i}) + (\texttt{H i}) ) \\
+            \vee & (~(\texttt{Y i}) < (\texttt{Y j}) + (\texttt{H j}) & \wedge & (\texttt{Y j}) + (\texttt{H j}) \le (\texttt{Y i}) + (\texttt{H i})~) \\
+            \vee & (~(\texttt{Y j}) \le (\texttt{Y i}) & \wedge & (\texttt{Y i}) < (\texttt{Y j}) + (\texttt{H j}) ) \\
+            \vee & (~(\texttt{Y j}) < (\texttt{Y i}) + (\texttt{H i}) & \wedge & (\texttt{Y i}) + (\texttt{H i}) \le (\texttt{Y j}) + (\texttt{H j})~) \\
+            )~~~ & & & \\
+    \end{array}
+\]
 
 The SMT-solver found the following solution for the list of shapes given in the exercise and a large square of 10 by 10:\\
-\begin{figure}[h!]
 \begin{center}
     \includegraphics[width=12cm]{rectangles.png}
 \end{center}
-\end{figure}
 
 The second part of the exercise was proving that for every solution, 
 the rectangles of length 8 and 9 are placed in parallel, 
