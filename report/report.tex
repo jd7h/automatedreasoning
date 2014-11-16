@@ -79,7 +79,7 @@ Since this brings the total amount of delivered pallets to 47 and the maximum nu
 
 \subsection*{Rectangles and squares}
 The problem: we have a list of $n$ shapes (rectangles and squares) 
-$s_1\dots s_n$ of dimensions width$(s_i)$ and height$(s_i)$.
+$s_0\dots s_n-1$ of dimensions width$(s_i)$ and height$(s_i)$.
 %of width \texttt{W(s_i)} and height \texttt{H(s_i)}.
 We also have a large square of width $b$.% and height \texttt{bound_y}. 
 We want to find a way to place all shapes within the bounding square 
@@ -97,6 +97,8 @@ We need these for our representation.
 
 We need \texttt{W} and \texttt{H} to define the actual size of all shapes,
 and \texttt{X} and \texttt{Y} to represent where the shapes are placed in the big square.
+
+In this particular example, $s_0$ and $s_1$ are the squares of sizes 4 and 6, and $s_2 \dots s_9$ are the rectangles with length $2 \dots 9$.
 
 The first thing we have to put in the formula, is that all shapes can be placed either horizontally or vertically in the square.
 In other words, for all shapes we have that either 
@@ -155,6 +157,43 @@ The SMT-solver found the following solution for the list of shapes given in the 
     \includegraphics[width=12cm]{rectangles.png}
 \end{center}
 \end{figure}
+
+The second part of the exercise was proving that for every solution, 
+the rectangles of length 8 and 9 are placed in parallel, 
+but not all non-square rectangles. 
+
+To prove this statement, we include rules in the formula 
+that state the negation of the statement we have to prove.
+If the SMT-solver then tells us that the formula is unsatisfiable, we know that the statement must be true for every solution. 
+%Note that the negation of the statement is equivalent to "8 and 9 are not placed or all non-square rectangles are placed in parallel".
+
+%To prove:
+%8 and 9 placed in parallel AND not all rectangles in parallel
+%NOT ( 8 and 9 placed in parallel AND not all rectangles in parallel )
+%(NOT 8 and 9 placed in parallel OR NOT NOT all rectangled in parallel )
+
+The rectangles with length 8 and 9 are placed in parallel, ie. they are either both placed horizontally or vertically:
+(\texttt{(W 8)} = width($s_8) \wedge$ \texttt{(H 8)} = height($s_8) \wedge$
+\texttt{(W 9)} = width($s_9) \wedge$ \texttt{(H 9)} = height($s_9))
+\vee$\\
+(\texttt{(W 8)} = height($s_8) \wedge$ \texttt{(H 8)} = width($s_8) \wedge$
+\texttt{(W 9)} = height($s_9) \wedge$ \texttt{(H 9)} = width($s_9$))\\
+
+Not all non-square rectangles are placed in parallel, ie. it is not the case that they are either all placed horizontally or all placed vertically:
+\[
+\neg
+\left(
+\bigvee_{2 \le i \le 9}
+\left( 
+\texttt{(W i)} = \text{width}(s_i) \wedge \texttt{(H i)} = \texttt{height}(s_i)
+\right)
+\oplus
+\bigvee_{2 \le i \le 9}
+\left(
+\texttt{(W i)} = \text{height}(s_i) \wedge \texttt{(H i)} = \text{width}(s_i)
+\right)
+\right)
+\]
 
 \subsection*{Scheduling of jobs}
 The problem: schedule twelve jobs with different running times, while adhering to a list of constraints.
