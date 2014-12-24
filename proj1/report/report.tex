@@ -81,9 +81,8 @@ Since this brings the total amount of delivered pallets to 47 and the maximum nu
 \clearpage
 
 \subsection*{Rectangles and squares}
-The problem: we have a list of $n$ shapes (rectangles and squares) 
-$s_0\dots s_{n-1}$ of dimensions width$(s_i)$ and height$(s_i)$.
-%of width \texttt{W(s_i)} and height \texttt{H(s_i)}.
+The problem: we have a list of $n$ rectangles 
+$s_0\dots s_{n-1}$ of dimensions width$(s_i)$ and height$(s_i)$, with $0 \le i <n$. %of width \texttt{W(s_i)} and height \texttt{H(s_i)}.
 We also have a large square of width $b$.% and height \texttt{bound_y}. 
 We want to find a way to place all shapes within the bounding square 
 without any shape overlapping the other.
@@ -103,7 +102,8 @@ and \texttt{X} and \texttt{Y} to represent where the shapes are placed in the bi
 
 In this particular example, $s_0$ and $s_1$ are the squares of sizes 4 and 6, and $s_2 \dots s_9$ are the rectangles with length $2 \dots 9$.
 
-The first thing we have to put in the formula, is that all shapes can be placed either horizontally or vertically in the square.
+The first thing we have to put in the formula is that 
+all shapes can be placed either horizontally or vertically in the big square.
 In other words, for all shapes we have that either 
 $(\texttt{W i}) = \text{width}(s_i) \text{~and~} (\texttt{H i}) = \text{height}(s_i)$ or 
 $(\texttt{W i}) = \text{height}(s_i) \text{~and~} (\texttt{H i}) = \text{width}(s_i)$:
@@ -129,7 +129,8 @@ In order to check whether two shapes $s_i$ and $s_j$ overlap, we first define an
 \clearpage
 
 In the following illustrations, we denote $s_i$ with the thick line, and $s_j$ with a dotted line.
-On the X-axis, $s_j$ is (partially) included in shape $s_i$, in other words $s_i \in_{\texttt{X}} s_j$, iff either:
+On the X-axis, $s_j$ is (partially) included in shape $s_i$, 
+in other words $s_j \in_{\texttt{X}} s_i$, iff:
 
 % X_i <= X_j && X_j < X_i + W_i
 \begin{center}
@@ -143,7 +144,7 @@ or
 \end{center}
 \[ (\texttt{X i}) < (\texttt{X j}) + (\texttt{W j}) ~\wedge~ (\texttt{X j}) + (\texttt{W j}) \le (\texttt{X i}) + (\texttt{W i}) \]
 
-The same relation holds for the Y-axis, thus $s_i \in_{\texttt{Y}} s_j$, when in the previous definition we replace all $\texttt{X}$ by $\texttt{Y}$ and $\texttt{W}$ by $\texttt{H}$.
+The same relation holds for the Y-axis, thus $s_j \in_{\texttt{Y}} s_i$, when in the previous definition we replace all $\texttt{X}$ by $\texttt{Y}$ and $\texttt{W}$ by $\texttt{H}$.
 The inclusion relation for two dimensions holds iff both formulas for both axis hold at the same time.
 
 \[ s_i \in_{\texttt{XY}} s_j \iff s_i \in_{\texttt{X}} s_j \wedge s_i \in_{\texttt{Y}} s_j \]
