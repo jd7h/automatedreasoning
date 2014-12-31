@@ -1,0 +1,244 @@
+MODULE village(_capacity, _init_supply)
+    VAR
+        supply : -1.._capacity;
+    ASSIGN
+        init(supply) := _init_supply;
+    DEFINE
+        starvation := (supply < 0);
+        capacity := _capacity;
+
+MODULE truck(_capacity)
+    VAR
+        supply : 0.._capacity;
+        location : {lA, lB, lC, lS};
+    ASSIGN
+        init(supply) := 300;
+        init(location) := lS;
+    DEFINE
+        capacity := _capacity;
+
+-- Updates other objects, and makes decision on what to do next.
+MODULE main
+    VAR
+        village_A : village(120, 50);
+        village_B : village(120, 40);
+        village_C : village(200, 150);
+        truck_t : truck(300);
+        state : {Decision, TravelA, TravelB, TravelC, TravelS, Load, Unload};
+    ASSIGN
+        init(state) := Decision;
+        
+        next(state) := case
+            state = Decision & truck_t.location = lS & truck_full : { TravelA, TravelB };
+            state = Decision & truck_t.location = lS : { Load, TravelA, TravelB };
+            
+            state = Decision & truck_t.location = lA & !truck_empty & !village_A_full : { Unload, TravelS, TravelB, TravelC };
+            state = Decision & truck_t.location = lA : { TravelS, TravelB, TravelC };
+            
+            state = Decision & truck_t.location = lB & !truck_empty & !village_B_full : { Unload, TravelS, TravelA, TravelC };
+            state = Decision & truck_t.location = lB : { TravelS, TravelA, TravelC };
+            
+            state = Decision & truck_t.location = lC & !truck_empty & !village_C_full : { Unload, TravelA, TravelB };
+            state = Decision & truck_t.location = lC : { TravelA, TravelB };
+            state != Decision : Decision;
+        esac;
+        
+        next(village_A.supply) := case
+            state = Unload & truck_t.location = lA & village_A_space <= truck_t.supply : village_A.capacity;
+            state = Unload & truck_t.location = lA : village_A.supply + truck_t.supply;
+            
+            state = TravelS : case
+                truck_t.location = lA & village_A.supply - dist_A_S < 0 : -1;
+                truck_t.location = lA : village_A.supply - dist_A_S;
+                
+                truck_t.location = lB & village_A.supply - dist_B_S < 0 : -1;
+                truck_t.location = lB : village_A.supply - dist_B_S;
+                
+                TRUE : village_A.supply;
+            esac;
+            
+            state = TravelA : case
+                truck_t.location = lB & village_A.supply - dist_A_B < 0 : -1;
+                truck_t.location = lB : village_A.supply - dist_A_B;
+                
+                truck_t.location = lC & village_A.supply - dist_A_C < 0 : -1;
+                truck_t.location = lC : village_A.supply - dist_A_C;
+                
+                truck_t.location = lS & village_A.supply - dist_A_S < 0 : -1;
+                truck_t.location = lS : village_A.supply - dist_A_S;
+                
+                TRUE : village_A.supply;
+            esac;
+            
+            state = TravelB : case
+                truck_t.location = lA & village_A.supply - dist_A_B < 0 : -1;
+                truck_t.location = lA : village_A.supply - dist_A_B;
+                
+                truck_t.location = lC & village_A.supply - dist_B_C < 0 : -1;
+                truck_t.location = lC : village_A.supply - dist_B_C;
+                
+                truck_t.location = lS & village_A.supply - dist_B_S < 0 : -1;
+                truck_t.location = lS : village_A.supply - dist_B_S;
+                
+                TRUE : village_A.supply;
+            esac;
+            
+            state = TravelC : case
+                truck_t.location = lA & village_A.supply - dist_A_C < 0 : -1;
+                truck_t.location = lA : village_A.supply - dist_A_C;
+                
+                truck_t.location = lB & village_A.supply - dist_B_C < 0 : -1;
+                truck_t.location = lB : village_A.supply - dist_B_C;
+                
+                TRUE : village_A.supply;
+            esac;
+            
+            TRUE : village_A.supply;
+        esac;
+        
+        next(village_B.supply) := case
+            state = Unload & truck_t.location = lB & village_B_space <= truck_t.supply : village_B.capacity;
+            state = Unload & truck_t.location = lB : village_B.supply + truck_t.supply;
+            
+            state = TravelS : case
+                truck_t.location = lA & village_B.supply - dist_A_S < 0 : -1;
+                truck_t.location = lA : village_B.supply - dist_A_S;
+                
+                truck_t.location = lB & village_B.supply - dist_B_S < 0 : -1;
+                truck_t.location = lB : village_B.supply - dist_B_S;
+                
+                TRUE : village_B.supply;
+            esac;
+            
+            state = TravelA : case
+                truck_t.location = lB & village_B.supply - dist_A_B < 0 : -1;
+                truck_t.location = lB : village_B.supply - dist_A_B;
+                
+                truck_t.location = lC & village_B.supply - dist_A_C < 0 : -1;
+                truck_t.location = lC : village_B.supply - dist_A_C;
+                
+                truck_t.location = lS & village_B.supply - dist_A_S < 0 : -1;
+                truck_t.location = lS : village_B.supply - dist_A_S;
+                
+                TRUE : village_B.supply;
+            esac;
+            
+            state = TravelB : case
+                truck_t.location = lA & village_B.supply - dist_A_B < 0 : -1;
+                truck_t.location = lA : village_B.supply - dist_A_B;
+                
+                truck_t.location = lC & village_B.supply - dist_B_C < 0 : -1;
+                truck_t.location = lC : village_B.supply - dist_B_C;
+                
+                truck_t.location = lS & village_B.supply - dist_B_S < 0 : -1;
+                truck_t.location = lS : village_B.supply - dist_B_S;
+                
+                TRUE : village_B.supply;
+            esac;
+            
+            state = TravelC : case
+                truck_t.location = lA & village_B.supply - dist_A_C < 0 : -1;
+                truck_t.location = lA : village_B.supply - dist_A_C;
+                
+                truck_t.location = lB & village_B.supply - dist_B_C < 0 : -1;
+                truck_t.location = lB : village_B.supply - dist_B_C;
+                
+                TRUE : village_B.supply;
+            esac;
+            
+            TRUE : village_B.supply;
+        esac;
+        
+        next(village_C.supply) := case
+            state = Unload & truck_t.location = lC & village_C_space <= truck_t.supply : village_C.capacity;
+            state = Unload & truck_t.location = lC : village_C.supply + truck_t.supply;
+            
+            state = TravelS : case
+                truck_t.location = lA & village_C.supply - dist_A_S < 0 : -1;
+                truck_t.location = lA : village_C.supply - dist_A_S;
+                
+                truck_t.location = lB & village_C.supply - dist_B_S < 0 : -1;
+                truck_t.location = lB : village_C.supply - dist_B_S;
+                
+                TRUE : village_C.supply;
+            esac;
+            
+            state = TravelA : case
+                truck_t.location = lB & village_C.supply - dist_A_B < 0 : -1;
+                truck_t.location = lB : village_C.supply - dist_A_B;
+                
+                truck_t.location = lC & village_C.supply - dist_A_C < 0 : -1;
+                truck_t.location = lC : village_C.supply - dist_A_C;
+                
+                truck_t.location = lS & village_C.supply - dist_A_S < 0 : -1;
+                truck_t.location = lS : village_C.supply - dist_A_S;
+                
+                TRUE : village_C.supply;
+            esac;
+            
+            state = TravelB : case
+                truck_t.location = lA & village_C.supply - dist_A_B < 0 : -1;
+                truck_t.location = lA : village_C.supply - dist_A_B;
+                
+                truck_t.location = lC & village_C.supply - dist_B_C < 0 : -1;
+                truck_t.location = lC : village_C.supply - dist_B_C;
+                
+                truck_t.location = lS & village_C.supply - dist_B_S < 0 : -1;
+                truck_t.location = lS : village_C.supply - dist_B_S;
+                
+                TRUE : village_C.supply;
+            esac;
+            
+            state = TravelC : case
+                truck_t.location = lA & village_C.supply - dist_A_C < 0 : -1;
+                truck_t.location = lA : village_C.supply - dist_A_C;
+                
+                truck_t.location = lB & village_C.supply - dist_B_C < 0 : -1;
+                truck_t.location = lB : village_C.supply - dist_B_C;
+                
+                TRUE : village_C.supply;
+            esac;
+            
+            TRUE : village_C.supply;
+        esac;
+        
+        next(truck_t.supply) := case
+            state = Unload & truck_t.location = lA & village_A_space <= truck_t.supply : truck_t.supply - village_A_space;
+            state = Unload & truck_t.location = lA : 0;
+            
+            state = Unload & truck_t.location = lB & village_B_space <= truck_t.supply : truck_t.supply - village_B_space;
+            state = Unload & truck_t.location = lB : 0;
+            
+            state = Unload & truck_t.location = lC & village_C_space <= truck_t.supply : truck_t.supply - village_C_space;
+            state = Unload & truck_t.location = lC : 0;
+            
+            state = Load : truck_t.capacity;
+            TRUE : truck_t.supply;
+        esac;
+        
+        next(truck_t.location) := case
+            state = TravelS : lS;
+            state = TravelA : lA;
+            state = TravelB : lB;
+            state = TravelC : lC;
+            TRUE : truck_t.location;
+        esac;
+    DEFINE
+        village_A_full := (village_A.supply = village_A.capacity);
+        village_B_full := (village_B.supply = village_B.capacity);
+        village_C_full := (village_C.supply = village_C.capacity);
+        
+        village_A_space := village_A.capacity - village_A.supply;
+        village_B_space := village_B.capacity - village_B.supply;
+        village_C_space := village_C.capacity - village_C.supply;
+        
+        truck_empty := (truck_t.supply = 0);
+        truck_full := (truck_t.supply = truck_t.capacity);
+        
+        dist_A_B := 17;
+        dist_A_C := 32;
+        dist_A_S := 29;
+        dist_B_C := 37;
+        dist_B_S := 21;
+
+CTLSPEC AF (village_A.starvation | village_B.starvation | village_C.starvation)
