@@ -1,0 +1,50 @@
+MODULE village(_capacity, init_supply)
+    VAR
+        supply : -1.._capacity;
+    ASSIGN
+        init(supply) := init_supply;
+    DEFINE
+        starvation := (supply < 0);
+        capacity := _capacity;
+
+MODULE truck(capacity)
+    VAR
+        supply : -1..capacity;
+        location : {lA, lB, lC, lS};
+    ASSIGN
+        init(supply) := 300;
+        init(location) := lS;
+
+-- Updates other objects, and makes decision on what to do next.
+MODULE main
+    VAR
+        village_A : village(120, 50);
+        village_B : village(120, 40);
+        village_C : village(200, 150);
+        truck_t : truck(300);
+        state : {Decision, TravelA, TravelB, TravelC, TravelS, Loading, Unloading};
+    ASSIGN
+        init(state) := Decision;
+        
+        next(state) := case
+            state = Decision & truck_t.location = lS : { Loading, Unloading, TravelA, TravelB };
+            state = Decision & truck_t.location = lA : { Loading, Unloading, TravelS, TravelB, TravelC };
+            state = Decision & truck_t.location = lB : { Loading, Unloading, TravelS, TravelA, TravelC };
+            state = Decision & truck_t.location = lC : { Loading, Unloading, TravelA, TravelB };
+            state != Decision : Decision;
+        esac;
+        
+        next(village_A.supply) := case
+            state = Unloading & truck_t.location = lA : village_A.supply + rangeA;
+            TRUE : village_A.supply;
+        esac;
+        
+        next(truck_t.supply) := case
+            state = Unloading & truck_t.location = lA : truck_t.supply + rangeA;
+            TRUE : truck_t.supply;
+        esac;
+    DEFINE
+        rangeA := case
+            village_A.capacity - village_A.supply < truck_t.supply : 0..5; -- (village_A.capacity - village_A.supply);
+            TRUE : 0..5; -- truck_t.supply;
+        esac;
