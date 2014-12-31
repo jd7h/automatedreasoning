@@ -29,21 +29,22 @@ MODULE main
         init(state) := Decision;
         
         next(state) := case
+            state = Decision & truck_t.location = lS & truck_full : { TravelA, TravelB };
             state = Decision & truck_t.location = lS : { Load, TravelA, TravelB };
             
-            state = Decision & truck_t.location = lA & truck_not_empty & village_A_not_full : { Unload, TravelS, TravelB, TravelC };
+            state = Decision & truck_t.location = lA & !truck_empty & !village_A_full : { Unload, TravelS, TravelB, TravelC };
             state = Decision & truck_t.location = lA : { TravelS, TravelB, TravelC };
             
-            state = Decision & truck_t.location = lB & truck_not_empty & village_B_not_full : { Unload, TravelS, TravelA, TravelC };
+            state = Decision & truck_t.location = lB & !truck_empty & !village_B_full : { Unload, TravelS, TravelA, TravelC };
             state = Decision & truck_t.location = lB : { TravelS, TravelA, TravelC };
             
-            state = Decision & truck_t.location = lC & truck_not_empty & village_C_not_full : { Unload, TravelA, TravelB };
+            state = Decision & truck_t.location = lC & !truck_empty & !village_C_full : { Unload, TravelA, TravelB };
             state = Decision & truck_t.location = lC : { TravelA, TravelB };
             state != Decision : Decision;
         esac;
         
         next(village_A.supply) := case
-            state = Unload & truck_t.location = lA & village_A_not_full : village_A.supply + 1;
+            state = Unload & truck_t.location = lA & !village_A_full : village_A.supply + 1;
             
             state = TravelS : case
                 truck_t.location = lA & village_A.supply - dist_A_S < 0 : -1;
@@ -95,7 +96,7 @@ MODULE main
         esac;
         
         next(village_B.supply) := case
-            state = Unload & truck_t.location = lB & village_B_not_full : village_B.supply + 1;
+            state = Unload & truck_t.location = lB & !village_B_full : village_B.supply + 1;
             
             state = TravelS : case
                 truck_t.location = lA & village_B.supply - dist_A_S < 0 : -1;
@@ -147,7 +148,7 @@ MODULE main
         esac;
         
         next(village_C.supply) := case
-            state = Unload & truck_t.location = lC & village_C_not_full : village_C.supply + 1;
+            state = Unload & truck_t.location = lC & !village_C_full : village_C.supply + 1;
             
             state = TravelS : case
                 truck_t.location = lA & village_C.supply - dist_A_S < 0 : -1;
@@ -199,7 +200,8 @@ MODULE main
         esac;
         
         next(truck_t.supply) := case
-            state = Unload & truck_not_empty : truck_t.supply - 1;
+            state = Unload & !truck_empty : truck_t.supply - 1;
+            state = Load : truck_t.capacity;
             TRUE : truck_t.supply;
         esac;
         
@@ -211,13 +213,17 @@ MODULE main
             TRUE : truck_t.location;
         esac;
     DEFINE
-        village_A_not_full := village_A.supply < village_A.capacity;
-        village_B_not_full := village_B.supply < village_B.capacity;
-        village_C_not_full := village_C.supply < village_C.capacity;
-        truck_not_empty := truck_t.supply > 0;
+        village_A_full := (village_A.supply = village_A.capacity);
+        village_B_full := (village_B.supply = village_B.capacity);
+        village_C_full := (village_C.supply = village_C.capacity);
+        
+        truck_empty := (truck_t.supply = 0);
+        truck_full := (truck_t.supply = truck_t.capacity);
         
         dist_A_B := 17;
         dist_A_C := 32;
         dist_A_S := 29;
         dist_B_C := 37;
         dist_B_S := 21;
+
+CTLSPEC AF (village_A.starvation | village_B.starvation | village_C.starvation)
