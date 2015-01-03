@@ -1,0 +1,33 @@
+MODULE powersoftwo(c)
+    VAR
+        i : 0..2;
+        x : 0..100;
+    ASSIGN
+        init(i) := 0;
+        init(x) := 0;
+        
+        next(i) := (i + 1) mod 3;
+        
+        next(x) := case
+            i = 0 : c;
+            i = 1 : x + c <= 100 ? x + c : 100;
+            
+            TRUE : x;
+        esac;
+        
+        next(c) := case
+            i = 2 : x;
+            
+            TRUE : c;
+        esac;
+
+MODULE main
+    VAR
+        c : 0..100;
+        p1 : process powersoftwo(c);
+        p2 : process powersoftwo(c);
+    ASSIGN
+        init(c) := 1;
+
+-- CTLSPEC EF (c = 99)
+CTLSPEC AG !(c = 99)
