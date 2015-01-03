@@ -1,0 +1,59 @@
+NuSMV checks bounds in a dumb way, and we need to add safeguards to everything
+- dynamic works wonders
+
+model:
+-- specification AF ((village_A.starvation | village_B.starvation) | village_C.starvation)  is true
+
+real    2591m35.140s
+user    2586m1.305s
+sys     0m2.344s
+
+model reduced:
+real    18mxxxs
+
+320:
+-- specification EG !((village_A.starvation | village_B.starvation) | village_C.starvation)  is true
+
+real    19m18.031s
+user    19m15.456s
+sys     0m0.104s
+
+
+318:
+
+-- specification EG !((village_A.starvation | village_B.starvation) | village_C.starvation)  is false
+-- as demonstrated by the following execution sequence
+Trace Description: CTL Counterexample
+Trace Type: Counterexample
+-> State: 1.1 <-
+  village_A.supply = 50
+  village_B.supply = 40
+  village_C.supply = 150
+  truck_t.supply = 318
+  truck_t.location = lS
+  state = Decision
+  dist_B_S = 21
+  dist_B_C = 37
+  dist_A_S = 29
+  dist_A_C = 32
+  dist_A_B = 17
+  truck_full = TRUE
+  truck_empty = FALSE
+  village_C_space = 50
+  village_B_space = 80
+  village_A_space = 70
+  village_C_full = FALSE
+  village_B_full = FALSE
+  village_A_full = FALSE
+  village_A.capacity = 120
+  village_A.starvation = FALSE
+  village_B.capacity = 120
+  village_B.starvation = FALSE
+  village_C.capacity = 200
+  village_C.starvation = FALSE
+  truck_t.capacity = 318
+
+real    12m23.919s
+user    12m22.198s
+sys     0m0.124s
+
