@@ -1,0 +1,125 @@
+MODULE channel
+    VAR
+        f : boolean;
+        b : 0..1;
+    ASSIGN
+        init(f) := FALSE;
+        init(b) := 0;
+
+MODULE alternatingbitcell
+    VAR
+        b : 0..1;
+    ASSIGN
+        init(b) := 0;
+
+MODULE sequence
+    VAR
+       data : array 0..(length - 1) of 0..1;
+       i : 0..(length - 1);
+    ASSIGN
+        init(i) := 0;
+    DEFINE
+        length := 3;
+       
+MODULE main
+    VAR
+        Bchan : channel;
+        Dchan : channel;
+        Scell : alternatingbitcell;
+        Rcell : alternatingbitcell;
+        Aseq : sequence;
+        Cseq : sequence;
+        
+        Bdatum : 0..1;
+        Cseq_full : boolean;
+        
+        step : {Decision, stepA, stepB, stepC, stepD, stepE, stepF};
+    
+    ASSIGN
+        init(step) := Decision;
+        next(step) := case
+            step = Decision : {stepA, stepB, stepC, stepD} union 
+                (Bchan_active ? {stepF} : {stepA}) union
+                (Dchan_active ? {stepE} : {stepA});
+            TRUE : Decision;
+        esac;
+        
+        next(Bchan.f) := case
+            step = stepA : FALSE;
+            step = stepC : TRUE;
+            TRUE : Bchan.f;
+        esac;
+        
+        next(Bchan.b) := case
+            step = stepC : Scell.b;
+            TRUE : Bchan.b;
+        esac;
+        
+        next(Dchan.f) := case
+            step = stepB : FALSE;
+            step = stepD : TRUE;
+            TRUE : Dchan.f;
+        esac;
+        
+        next(Dchan.b) := case
+            step = stepD : (Rcell.b + 1) mod 2;
+            TRUE : Dchan.b;
+        esac;
+        
+        next(Scell.b) := case
+            step = stepE : (Scell.b + 1) mod 2;
+            TRUE : Scell.b;
+        esac;
+        
+        next(Rcell.b) := case
+            step = stepF : (Rcell.b + 1) mod 2;
+            TRUE : Rcell.b;
+        esac;
+        
+        next(Aseq.i) := case
+            step = stepE : Aseq.i < Aseq.length - 1 ? Aseq.i + 1 : Aseq.i;
+            TRUE : Aseq.i;
+        esac;
+        
+        next(Aseq.data[0]) := Aseq.data[0];
+        next(Aseq.data[1]) := Aseq.data[1];
+        next(Aseq.data[2]) := Aseq.data[2];
+        
+        next(Cseq.i) := case
+            step = stepF : Cseq.i < Cseq.length - 1 ? Cseq.i + 1 : Cseq.i;
+            TRUE : Cseq.i;
+        esac;
+        
+        next(Cseq.data[0]) := case
+            step = stepF & Cseq.i = 0 : Bdatum;
+            TRUE : Cseq.data[0];
+        esac;
+        
+        next(Cseq.data[1]) := case
+            step = stepF & Cseq.i = 1 : Bdatum;
+            TRUE : Cseq.data[1];
+        esac;
+        
+        next(Cseq.data[2]) := case
+            step = stepF & Cseq.i = 2 : Bdatum;
+            TRUE : Cseq.data[2];
+        esac;
+        
+        next(Bdatum) := case
+            step = stepC : Aseq.data[Aseq.i];
+            TRUE : Bdatum;
+        esac;
+        
+        init(Cseq_full) := FALSE;
+        next(Cseq_full) := case
+            step = stepF & Cseq.i = Cseq.length - 1 : TRUE;
+            TRUE : Cseq_full;
+        esac;
+        
+    DEFINE
+        Bchan_active := (Bchan.f & Bchan.b = Rcell.b);
+        Dchan_active := (Dchan.f & Dchan.b = Scell.b);
+        Aseq_Cseq_eq := (Aseq.data[0] = Cseq.data[0]) & (Aseq.data[1] = Cseq.data[1]) & (Aseq.data[2] = Cseq.data[2]);
+
+CTLSPEC AG (Cseq_full -> Aseq_Cseq_eq)
+-- CTLSPEC EF (Cseq_full & Aseq_Cseq_eq)
