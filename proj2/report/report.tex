@@ -52,6 +52,29 @@ we ask NuSMV to repeatedly choose non-deterministically
 between these two processes. 
 This way we effectively simulate parallel execution.
 
+%toevoegen: NuSMV is bounded.
+
+We found the solution to the problem by asking NuSMV 
+to verify the following CTL specification:
+\[\texttt{CTLSPEC AG !(c=99)}\]
+which states that it's never possible that c reaches the value 99.
+NuSMV proved the statement false and 
+provided us with a trace as a counter-example.
+
+The consecutive values of $c$ before it reaches $99$ are as follows:
+\begin{verbatim}
+  c = 1
+  c = 2
+  c = 3
+  c = 6
+  c = 12
+  c = 24
+  c = 48
+  c = 51
+  c = 99
+\end{verbatim}
+
+
 \clearpage
 
 \subsection*{Rectangles and squares}
