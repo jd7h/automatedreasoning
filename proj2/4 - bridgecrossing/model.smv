@@ -1,0 +1,64 @@
+MODULE person(_traveltime, _flashlight, _state)
+    VAR
+        side : {origin, destination};
+        traveling : boolean;
+    ASSIGN
+        init(side) := origin;
+        init(traveling) := FALSE;
+        
+        next(side) := case
+            _state = Traveling & traveling : side_inv;
+            TRUE : side;
+        esac;
+        
+        next(traveling) := case
+            _state = Decision & _flashlight = side : {TRUE, FALSE};
+            TRUE : FALSE;
+        esac;
+    DEFINE
+        traveltime := _traveltime;
+        traveltime_norm := traveling ? traveltime : 0;
+        side_inv := side = origin ? destination : origin;
+
+MODULE main
+    VAR
+        time : 0..bound;
+        flashlight : {origin, destination};
+        
+        p1 : person(1, flashlight, state);
+        p2 : person(2, flashlight, state);
+        p3 : person(5, flashlight, state);
+        p4 : person(10, flashlight, state);
+        state : {Decision, Traveling};
+    INVAR
+        state = Traveling -> count(p1.traveling, p2.traveling, p3.traveling, p4.traveling) in 1..2;
+    ASSIGN
+        init(time) := 0;
+        init(flashlight) := origin;
+        init(state) := Decision;
+        
+        next(state) := case
+            state = Decision : Traveling;
+            state = Traveling : Decision;
+        esac;
+
+        next(flashlight) := case
+            state = Traveling : flashlight = origin ? destination : origin;
+            TRUE : flashlight;
+        esac;
+        
+        next(time) := case
+            state = Traveling : time + max_p1234 < bound ? time + max_p1234 : bound;
+            TRUE : time;
+        esac;
+    DEFINE
+        needle := 17;
+        bound := needle + 1;
+        crossing_done := (p1.side = destination & p2.side = destination & p3.side = destination & p4.side = destination);
+        
+        max_p12 := p1.traveltime_norm > p2.traveltime_norm ? p1.traveltime_norm : p2.traveltime_norm;
+        max_p34 := p3.traveltime_norm > p4.traveltime_norm ? p3.traveltime_norm : p4.traveltime_norm;
+        max_p1234 := max_p12 > max_p34 ? max_p12 : max_p34;
+
+CTLSPEC EF (crossing_done & time <= needle);
+CTLSPEC AG !(crossing_done & time < needle);

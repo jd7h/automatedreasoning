@@ -1,0 +1,158 @@
+*** This is NuSMV 2.5.4 (compiled on Fri Oct 28 13:48:41 UTC 2011)
+*** Enabled addons are: compass 
+*** For more information on NuSMV see <http://nusmv.fbk.eu>
+*** or email to <nusmv-users@list.fbk.eu>.
+*** Please report bugs to <nusmv-users@fbk.eu>
+
+*** Copyright (c) 2010, Fondazione Bruno Kessler
+
+*** This version of NuSMV is linked to the CUDD library version 2.4.1
+*** Copyright (c) 1995-2004, Regents of the University of Colorado
+
+*** This version of NuSMV is linked to the MiniSat SAT solver. 
+*** See http://www.cs.chalmers.se/Cs/Research/FormalMethods/MiniSat
+*** Copyright (c) 2003-2005, Niklas Een, Niklas Sorensson 
+
+WARNING *** This version of NuSMV is linked to the zchaff SAT         ***
+WARNING *** solver (see http://www.princeton.edu/~chaff/zchaff.html). ***
+WARNING *** Zchaff is used in Bounded Model Checking when the         ***
+WARNING *** system variable "sat_solver" is set to "zchaff".          ***
+WARNING *** Notice that zchaff is for non-commercial purposes only.   ***
+WARNING *** NO COMMERCIAL USE OF ZCHAFF IS ALLOWED WITHOUT WRITTEN    ***
+WARNING *** PERMISSION FROM PRINCETON UNIVERSITY.                     ***
+WARNING *** Please contact Sharad Malik (malik@ee.princeton.edu)      ***
+WARNING *** for details.                                              ***
+
+-- specification AG !(crossing_done & time <= needle)  is false
+-- as demonstrated by the following execution sequence
+Trace Description: CTL Counterexample 
+Trace Type: Counterexample 
+-> State: 1.1 <-
+  time = 0
+  flashlight = origin
+  p1.side = origin
+  p1.traveling = FALSE
+  p2.side = origin
+  p2.traveling = FALSE
+  p3.side = origin
+  p3.traveling = FALSE
+  p4.side = origin
+  p4.traveling = FALSE
+  state = Decision
+  max_p1234 = 0
+  max_p34 = 0
+  max_p12 = 0
+  crossing_done = FALSE
+  bound = 18
+  needle = 17
+  p1.side_inv = destination
+  p1.traveltime_norm = 0
+  p1.traveltime = 1
+  p2.side_inv = destination
+  p2.traveltime_norm = 0
+  p2.traveltime = 2
+  p3.side_inv = destination
+  p3.traveltime_norm = 0
+  p3.traveltime = 5
+  p4.side_inv = destination
+  p4.traveltime_norm = 0
+  p4.traveltime = 10
+-> State: 1.2 <-
+  p1.traveling = TRUE
+  p2.traveling = TRUE
+  state = Traveling
+  max_p1234 = 2
+  max_p12 = 2
+  p1.traveltime_norm = 1
+  p2.traveltime_norm = 2
+-> State: 1.3 <-
+  time = 2
+  flashlight = destination
+  p1.side = destination
+  p1.traveling = FALSE
+  p2.side = destination
+  p2.traveling = FALSE
+  state = Decision
+  max_p1234 = 0
+  max_p12 = 0
+  p1.side_inv = origin
+  p1.traveltime_norm = 0
+  p2.side_inv = origin
+  p2.traveltime_norm = 0
+-> State: 1.4 <-
+  p1.traveling = TRUE
+  state = Traveling
+  max_p1234 = 1
+  max_p12 = 1
+  p1.traveltime_norm = 1
+-> State: 1.5 <-
+  time = 3
+  flashlight = origin
+  p1.side = origin
+  p1.traveling = FALSE
+  state = Decision
+  max_p1234 = 0
+  max_p12 = 0
+  p1.side_inv = destination
+  p1.traveltime_norm = 0
+-> State: 1.6 <-
+  p3.traveling = TRUE
+  p4.traveling = TRUE
+  state = Traveling
+  max_p1234 = 10
+  max_p34 = 10
+  p3.traveltime_norm = 5
+  p4.traveltime_norm = 10
+-> State: 1.7 <-
+  time = 13
+  flashlight = destination
+  p3.side = destination
+  p3.traveling = FALSE
+  p4.side = destination
+  p4.traveling = FALSE
+  state = Decision
+  max_p1234 = 0
+  max_p34 = 0
+  p3.side_inv = origin
+  p3.traveltime_norm = 0
+  p4.side_inv = origin
+  p4.traveltime_norm = 0
+-> State: 1.8 <-
+  p2.traveling = TRUE
+  state = Traveling
+  max_p1234 = 2
+  max_p12 = 2
+  p2.traveltime_norm = 2
+-> State: 1.9 <-
+  time = 15
+  flashlight = origin
+  p2.side = origin
+  p2.traveling = FALSE
+  state = Decision
+  max_p1234 = 0
+  max_p12 = 0
+  p2.side_inv = destination
+  p2.traveltime_norm = 0
+-> State: 1.10 <-
+  p1.traveling = TRUE
+  p2.traveling = TRUE
+  state = Traveling
+  max_p1234 = 2
+  max_p12 = 2
+  p1.traveltime_norm = 1
+  p2.traveltime_norm = 2
+-> State: 1.11 <-
+  time = 17
+  flashlight = destination
+  p1.side = destination
+  p1.traveling = FALSE
+  p2.side = destination
+  p2.traveling = FALSE
+  state = Decision
+  max_p1234 = 0
+  max_p12 = 0
+  crossing_done = TRUE
+  p1.side_inv = origin
+  p1.traveltime_norm = 0
+  p2.side_inv = origin
+  p2.traveltime_norm = 0
