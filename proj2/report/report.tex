@@ -74,10 +74,54 @@ The consecutive values of $c$ before it reaches $99$ are as follows:
   c = 99
 \end{verbatim}
 
-
 \clearpage
 
-\subsection*{Rectangles and squares}
+\subsection*{Villages and food}
+The problem: Three villages A, B and C consume one food package per time unit. 
+Food packages are delivered by a truck. 
+
+We need to solve the following problems:
+\begin{enumerate}
+\item Show that it's impossible to deliver food packages in such a way that 
+forever each of the villages may consume one food package per time unit 
+(ie. no starvation);
+\item Show that, 
+if the capacity of the truck is increased to 320 food packages, 
+it is possible that forever each of the villages 
+may consume one food package per time unit;
+\item Figure out what happens if the capacity of the truck is increased to 318 food packages.
+\end{enumerate}
+
+We start out by defining a module \texttt{village} that registers the maximum capacity and the supply of food packages for a village.
+We also have a module \texttt{truck} that registers 
+the capacity and supply of food packages of the truck and 
+the location of the truck on the graph (A, B, C or S).
+Finally, we have the \texttt{main} module, 
+where we implemented a state machine to deal with the 
+rest of the scenario of the problem:
+the \texttt{main} module has 3 instances of \texttt{village}, 
+one \texttt{truck}, 
+and a variable \emph{state} that registers the state of the truck. 
+The truck can be in one of the following states:
+\[\texttt{state : \{Decision, traveltoA, traveltoB, traveltoC, traveltoS, Load, Unload\}}\]
+Decision is the neutral state. 
+We return to this state every time an action is completed. 
+Where we can go from the Decision state is dependent on 
+the location of the truck and the supply of food packages left:\\
+\begin{tabular}{|l|p{12cm}|}
+\hline
+traveltoA & the current location of the truck is a neighbour of village A\\
+traveltoB & the current location of the truck is a neighbour of village B\\
+traveltoC & the current location of the truck is a neighbour of village C\\
+traveltoS & the current location of the truck is a neighbour of village S\\
+Load & the truck is in S and the supply of food packages
+	is less than the maximum capacity of the truck\\
+Unload & the truck is in one of the villages, 
+	the village is not at maximum capacity and 
+	the truck is not empty\\
+\hline
+\end{tabular}
+
 The problem: we have a list of $n$ rectangles 
 $s_0\dots s_{n-1}$ of dimensions width$(s_i)$ and height$(s_i)$, with $0 \le i <n$. %of width \texttt{W(s_i)} and height \texttt{H(s_i)}.
 We also have a large square of width $b$.% and height \texttt{bound_y}. 
