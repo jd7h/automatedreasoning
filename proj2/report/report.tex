@@ -24,11 +24,12 @@ Judith van Stegeren (s3014827)\\
 \vspace{8mm}
 
 \subsection*{Parallel execution}
-The problem: P is the process
+\paragraph{The problem}
+$P$ is the process
 \[\texttt{while true do \{x := c; x:= x + c; c := x;\}}\]
-Consider the parallel composition $P\|P$ in which $x$ is 
+Consider the parallel composition $P~\|~P$ in which $x$ is 
 local and $c$ is global.
-Show that it is possible that executing $P\|P$ starting from 
+Show that it is possible that executing $P~\|~P$ starting from 
 $c=1$ may reach $c=99$, 
 and give the consecutive values of the variable $c$ 
 before this value $c=99$ is reached.
@@ -46,14 +47,25 @@ With the \texttt{next()} function we define the body of the program $P$: every t
 
 Secondly, we have a module \texttt{main} where
 the global variable $c$ is stored, 
-together with two instances $p1, p2$ of the module \texttt{powersoftwo}.
+together with two instances $p1$, $p2$ of the module \texttt{powersoftwo}.
 By using the \texttt{process} keyword, 
 we ask NuSMV to repeatedly choose non-deterministically 
 between these two processes. 
 This way we effectively simulate parallel execution.
 
-%toevoegen: NuSMV is bounded.
+\paragraph{Remark}
+Because NuSMV employs bounded model checking, we need to explicitly give a bound for the integer values $x_1$, $x_2$ and $c$.
+The module \texttt{powersoftwo} increases the values of these variables monotonically.
+Thus once the value of these variables is increased beyond $99$, they can never decrease to $99$ again.
+We decided to set the maximum value to $100$.
+Whenever the value increases beyond this point, the maximum value is kept.
+\[\texttt{x + c <= 100 ? x + c : 100;}\]
 
+\paragraph{Generalization}
+In our solution the search value $99$ is a constant definition, so that the bound can be adjusted easily across all modules.
+Adding an extra \texttt{powersoftwo} instance is trivial, as it only requires the declaration of this new instance.
+
+\paragraph{Results}
 We found the solution to the problem by asking NuSMV 
 to verify the following CTL specification:
 \[\texttt{CTLSPEC AG !(c=99)}\]
@@ -74,6 +86,7 @@ The consecutive values of $c$ before it reaches $99$ are as follows:
   c = 99
 \end{verbatim}
 
+NuSMV found this counterexample in 3.2 seconds.
 
 \clearpage
 
