@@ -106,7 +106,7 @@ NuSMV found this counterexample in 3.2 seconds.
 \clearpage
 
 \subsection*{Villages and food}
-The problem: Three villages A, B and C consume one food package per time unit. 
+\paragraph{The problem}Three villages A, B and C consume one food package per time unit. 
 Food packages are delivered by a truck. 
 
 We need to solve the following problems:
@@ -121,7 +121,7 @@ may consume one food package per time unit;
 \item Figure out what happens if the capacity of the truck is increased to 318 food packages.
 \end{enumerate}
 
-We start out by defining a module \texttt{village} that registers the maximum capacity and the supply of food packages for a village.
+\paragraph{Representation} We start out by defining a module \texttt{village} that registers the maximum capacity and the supply of food packages for a village.
 We also have a module \texttt{truck} that registers 
 the capacity and supply of food packages of the truck and 
 the location of the truck on the graph (A, B, C or S).
@@ -133,297 +133,67 @@ one \texttt{truck},
 and a variable \emph{state} that registers the state of the truck. 
 The truck can be in one of the following states:
 \[\texttt{state : \{Decision, traveltoA, traveltoB, traveltoC, traveltoS, Load, Unload\}}\]
-Decision is the neutral state. 
+
+\paragraph{Decision state} Decision is the neutral state. 
 We return to this state every time an action is completed. 
 Where we can go from the Decision state is dependent on 
 the location of the truck and the supply of food packages left:\\
+
 \begin{tabular}{|l|p{12cm}|}
 \hline
-traveltoA & the current location of the truck is a neighbour of village A\\
-traveltoB & the current location of the truck is a neighbour of village B\\
-traveltoC & the current location of the truck is a neighbour of village C\\
-traveltoS & the current location of the truck is a neighbour of village S\\
-Load & the truck is in S and the supply of food packages
+Decision $\rightarrow$ traveltoA & the current location of the truck is a neighbour of village A\\
+Decision $\rightarrow$ traveltoB & the current location of the truck is a neighbour of village B\\
+Decision $\rightarrow$ traveltoC & the current location of the truck is a neighbour of village C\\
+Decision $\rightarrow$ traveltoS & the current location of the truck is a neighbour of village S\\
+Decision $\rightarrow$ Load & the truck is in S and the supply of food packages
 	is less than the maximum capacity of the truck\\
-Unload & the truck is in one of the villages, 
+Decision $\rightarrow$ Unload & the truck is in one of the villages, 
 	the village is not at maximum capacity and 
 	the truck is not empty\\
 \hline
+\end{tabular}\\
+
+\paragraph{Action state} When we've chosen an action, we update all variables according to the state we're in:\\
+
+\begin{tabular}{|l|p{12cm}|}
+\hline
+variable changes&\\
+traveltoA & all villages consume food packages 
+	depending on the time it takes the truck to reach this location\\
+traveltoB & all villages consume food packages\\
+traveltoC & all villages consume food packages\\
+traveltoS & all villages consume food packages\\
+Load & truck supply is at maximum capacity\\ 
+Unload & village supply of food packages increases, 
+	truck supply decreases\\
+\hline
 \end{tabular}
 
-The problem: we have a list of $n$ rectangles 
-$s_0\dots s_{n-1}$ of dimensions width$(s_i)$ and height$(s_i)$, with $0 \le i <n$. %of width \texttt{W(s_i)} and height \texttt{H(s_i)}.
-We also have a large square of width $b$.% and height \texttt{bound_y}. 
-We want to find a way to place all shapes within the bounding square 
-without any shape overlapping the other.
+When all variables are updated according to the current state, 
+the state returns to the value Decision.
+Finally we added predicates \texttt{starvation} for every villages, which are true when the village has run out of food packages to consume.
 
-We start out by defining 4 functions. 
-We need these for our representation.
+\paragraph{Remark about unloading} At first, we let the NuSMV choose how much packages the truck would unload in a village by stating that every Unload action would transfer only one packages from the truck to the village. By choosing Unload multiple times before choosing a Travel state, the truck would unload multiple packages.
 
+Because of this, the state space became quite big and it took NuSMV 40 hours to check our model.
+
+We then reduced the state space by changing the Unload action as follows: the truck now unloads as much food packages as possible, either until the truck is empty or the village is full. NuSMV then took only 20 minutes to check the model.
+
+\paragraph{Answers} NuSMV found the following answers to the questions:
 \begin{enumerate}
-\item the function \texttt{W :: Int -> Int} that returns the width of a shape.
-\item the function \texttt{H :: Int -> Int}  that returns the height of a shape.
-\item the function \texttt{X :: Int -> Int} that returns the x-coordinate of the upper-left-point of a shape.
-\item the function \texttt{Y :: Int -> Int} that returns the y-coordinate of the upper-left-point of a shape.
+\item We asked NuSMV to check the CTL specification
+\[ \texttt{AF ((village\_A.starvation | village\_B.starvation) | village\_C.
+starvation)} \]
+which states that every trace eventually ends up in a state where one of the villages can no longer consume a food package.
+NuSMV returned \texttt{true} after 18 minutes.
+
+\item We changed the truck capacity to 320 and checked the CTL specification
+\[ \texttt{EG !((village\_A.starvation | village\_B.starvation) | village\_C.starvation)} \]
+which states that there is a trace where we never encounter starvation.
+NuSMV returned \texttt{true} after 19 minutes.
+
+\item We changed the truck capacity to 318 and checked the CTL specification
+\[\texttt{EG !((village\_A.starvation | village\_B.starvation) | village\_C.starvation)} \]
+NuSMV returned \texttt{false} after 12 minutes.
 \end{enumerate}
-
-We need \texttt{W} and \texttt{H} to define the actual size of all shapes,
-and \texttt{X} and \texttt{Y} to represent where the shapes are placed in the big square.
-
-In this particular example, $s_0$ and $s_1$ are the squares of sizes 4 and 6, and $s_2 \dots s_9$ are the rectangles with length $2 \dots 9$.
-
-The first thing we have to put in the formula is that 
-all shapes can be placed either horizontally or vertically in the big square.
-In other words, for all shapes we have that either 
-$(\texttt{W i}) = \text{width}(s_i) \text{~and~} (\texttt{H i}) = \text{height}(s_i)$ or 
-$(\texttt{W i}) = \text{height}(s_i) \text{~and~} (\texttt{H i}) = \text{width}(s_i)$:
-
-\[ \bigwedge_{0 \le i < n}
-(\texttt{W i}) = \text{width}(s_i) \wedge (\texttt{H i}) = \text{height}(s_i) \oplus
-(\texttt{W i}) = \text{height}(s_i) \wedge (\texttt{H i}) = \text{width}(s_i)
-\]
-
-Furthermore, all shapes must stay within the bounds of the big square, ie. their X and Y coordinates must be somewhere between 0 and $b$.
-
-\[ \bigwedge_{0 \le i < n}
-(\texttt{X i}) \ge 0 \wedge
-(\texttt{Y i}) \ge 0 \wedge
-(\texttt{X i})+(\texttt{W i}) \le b \wedge
-(\texttt{Y i})+(\texttt{H i}) \le b
-\]
-
-We also don't want any of the shapes to overlap.
-In order to check whether two shapes $s_i$ and $s_j$ overlap, we first define an inclusion-relation:
-\[ s_i \in s_j \]
-
-\clearpage
-
-In the following illustrations, we denote $s_i$ with the thick line, and $s_j$ with a dotted line.
-On the X-axis, $s_j$ is (partially) included in shape $s_i$, 
-in other words $s_j \in_{\texttt{X}} s_i$, iff:
-
-% X_i <= X_j && X_j < X_i + W_i
-\begin{center}
-\end{center}
-\[ (\texttt{X i}) \le (\texttt{X j}) ~\wedge~ (\texttt{X j}) < (\texttt{X i}) + (\texttt{W i}) \]
-or
-% X_i < X_j + W_j && X_j + W_j <= X_i + W_i
-\begin{center}
-\end{center}
-\[ (\texttt{X i}) < (\texttt{X j}) + (\texttt{W j}) ~\wedge~ (\texttt{X j}) + (\texttt{W j}) \le (\texttt{X i}) + (\texttt{W i}) \]
-
-The same relation holds for the Y-axis, thus $s_j \in_{\texttt{Y}} s_i$, when in the previous definition we replace all $\texttt{X}$ by $\texttt{Y}$ and $\texttt{W}$ by $\texttt{H}$.
-The inclusion relation for two dimensions holds iff both formulas for both axis hold at the same time.
-
-\[ s_i \in_{\texttt{XY}} s_j \iff s_i \in_{\texttt{X}} s_j \wedge s_i \in_{\texttt{Y}} s_j \]
-
-We then define overlap as the symmetric inclusion relation:
-
-\[ s_i \bowtie s_j \iff s_i \in_{\texttt{XY}} s_j ~\vee~ s_j \in_{\texttt{XY}} s_i \]
-
-However, this overlap relation does not work as we would like.
-For example, if a big square is covered by a rectangle like this:
-\begin{center}
-\begin{tikzpicture}[>=latex]
-\draw[fill=red] (1,0) rectangle (5,4);
-\draw[fill=blue] (0,2) rectangle (6,3);
-\end{tikzpicture}
-\end{center}
-
-We clearly see that there is overlap, but the two objects do not include each other as defined in our inclusion relation.
-We repair the overlap relation by no longer requiring strict inclusion, and using the following definition instead:
-\[ s_i \bowtie s_j \iff (s_i \in_{\texttt{X}} s_j ~\vee~ s_j \in_{\texttt{X}} s_i) \wedge (s_i \in_{\texttt{Y}} s_j ~\vee~ s_j \in_{\texttt{Y}} s_i) \]
-The `no overlap' constraint can then be formulated as:
-\[ \neg \bigvee_{0 \le i < n} ~ \bigvee_{0 \le j < i} s_i \bowtie s_j \]
-As the relation is symmetric, we only need to check half of the pairs of shapes.
-Every shape also overlaps with itself, so we exclude the reflexive pairs of shapes as well.
-
-We get the following pseudo-Yices after expanding these definitions:
-\[
-    \begin{array}{rlcl}
-        \neg \bigvee_{0 \le i < n} ~ \bigvee_{0 \le j < i} & & & \\
-            (~~~ & (~(\texttt{X i}) \le (\texttt{X j}) & \wedge & (\texttt{X j}) < (\texttt{X i}) + (\texttt{W i}) ) \\
-            \vee & (~(\texttt{X i}) < (\texttt{X j}) + (\texttt{W j}) & \wedge & (\texttt{X j}) + (\texttt{W j}) \le (\texttt{X i}) + (\texttt{W i})~) \\
-            \vee & (~(\texttt{X j}) \le (\texttt{X i}) & \wedge & (\texttt{X i}) < (\texttt{X j}) + (\texttt{W j}) ) \\
-            \vee & (~(\texttt{X j}) < (\texttt{X i}) + (\texttt{W i}) & \wedge & (\texttt{X i}) + (\texttt{W i}) \le (\texttt{X j}) + (\texttt{W j})~) \\
-            )~~~ & & & \\
-     \wedge~(~~~ & (~(\texttt{Y i}) \le (\texttt{Y j}) & \wedge & (\texttt{Y j}) < (\texttt{Y i}) + (\texttt{H i}) ) \\
-            \vee & (~(\texttt{Y i}) < (\texttt{Y j}) + (\texttt{H j}) & \wedge & (\texttt{Y j}) + (\texttt{H j}) \le (\texttt{Y i}) + (\texttt{H i})~) \\
-            \vee & (~(\texttt{Y j}) \le (\texttt{Y i}) & \wedge & (\texttt{Y i}) < (\texttt{Y j}) + (\texttt{H j}) ) \\
-            \vee & (~(\texttt{Y j}) < (\texttt{Y i}) + (\texttt{H i}) & \wedge & (\texttt{Y i}) + (\texttt{H i}) \le (\texttt{Y j}) + (\texttt{H j})~) \\
-            )~~~ & & & \\
-    \end{array}
-\]
-
-The SMT-solver found the following solution for the list of shapes given in the exercise and a large square of 10 by 10:\\
-\begin{center}
-\end{center}
-
-The second part of the exercise was proving that for every solution, 
-the rectangles of length 8 and 9 are placed in parallel, 
-but not all non-square rectangles. 
-
-To prove this statement, we include rules in the formula 
-that state the negation of the statement we have to prove.
-If the SMT-solver then tells us that the formula is unsatisfiable, we know that the statement must be true for every solution. 
-%Note that the negation of the statement is equivalent to "8 and 9 are not placed or all non-square rectangles are placed in parallel".
-
-%To prove:
-%8 and 9 placed in parallel AND not all rectangles in parallel
-%NOT ( 8 and 9 placed in parallel AND not all rectangles in parallel )
-%(NOT 8 and 9 placed in parallel OR NOT NOT all rectangled in parallel )
-
-The first part of the statement is that the rectangles with length 8 and 9 are placed in parallel, 
-ie. they are either both placed horizontally or vertically:\\
-\[
-    \begin{array}{rlcl}
-    & (\texttt{(W 8)} = 8 \wedge \texttt{(H 8)} = 1 & \wedge & \texttt{(W 9)} = 9 \wedge \texttt{(H 9)} = 1) \\
-    \vee & (\texttt{(W 8)} = 1 \wedge \texttt{(H 8)} = 8 & \wedge & \texttt{(W 9)} = 1 \wedge \texttt{(H 9)} = 9)
-    \end{array}
-\]
-
-The second part of the statement is that 
-not all non-square rectangles are placed in parallel, 
-ie. it is not the case that they are either all placed horizontally or all placed vertically:
-\[
-\neg
-\left(
-\bigwedge_{2 \le i \le 9}
-\left( 
-\texttt{(W i)} = \text{width}(s_i) \wedge \texttt{(H i)} = \texttt{height}(s_i)
-\right)
-\oplus
-\bigwedge_{2 \le i \le 9}
-\left(
-\texttt{(W i)} = \text{height}(s_i) \wedge \texttt{(H i)} = \text{width}(s_i)
-\right)
-\right)
-\]
-
-Then we take the negation of the conjuction of these two parts and add them to the formula.
-
-The SMT-solver found that if we add that statement, the formula is unsatisfiable, which means that if we have a solution to the original formula, it must be the case that the rectangles of length 8 and 9 are placed in parallel but not all non-square rectangles are placed in parallel.
-
-
-\subsection*{Scheduling of jobs}
-The problem: schedule twelve jobs with different running times, while adhering to a list of constraints.
-Investigate the minimal running time needed to complete all jobs.
-Our solution works for a arbitrary number of jobs.
-We want to schedule $j$ jobs numbered from 1 to $j$.
-The running time for job $i$ is $rt_i = i+5$.
-
-Our representation is as follows.
-We have a timeline of length $T$.
-For every moment in time, we have a status code for every job: it is either ready (0), running (1) or finished (2). 
-For this we have the function 
-\[\texttt{Status :: Int -> Int -> Int}\]
-\texttt{Status 1 10 2} means that job 1 at timeframe 10 is finished. 
-
-The job status must be either 0, 1 or 2, for all jobs and moments in time:
-\[ \bigwedge_{0 \le \texttt{t} < T} ~ \bigwedge_{0 \le \texttt{i} < j} \texttt{Status i t} \ge 0\wedge \texttt{Status i t} \le 2\]
-
-We now want to specify the correct behaviour for each job. 
-Since the running time for each job $i$ is $rt_i$ and we want it to be finished before or on timeframe $T-1$ (the end of the timeline), we have to start job $i$ at timeframe $T - rt_i$ at the latest.
-We take $st_i$ as the starting time of job $i$, with $0 \le st_i < lt_i$ and $lt_i = T-rt_i$.
-
-Before a job starts (1), it must be ready (0):
-\[ \bigwedge_{0 \le \texttt{tt} < st_i} \texttt{Status i tt} = 0 \]
-
-We want the jobs to run without interrupt.
-In other words, if a job has started, it will not stop until it is finished. 
-If job $i$ starts at timeframe $st_i$, it keeps running in timeframes $st_i \dots (st_i + rt_i)$.
-\[ \bigwedge_{0 \le \texttt{rt} < rt_i} \texttt{Status i (st+rt)} = 1 \]
-
-If the job is done running, it is finished and it will stay finished for the remainder of the timeframes, starting at timeframe $st_i + rt_i$.
-\[ \bigwedge_{0 \le \texttt{tt} < T-st-rt_i} \texttt{Status i tt} = 2 \]
-
-If we put these three conditions together, we get:
-\[ \begin{array}{rll}
-    \bigwedge_{0 \le \texttt{i} < j} \bigvee_{0 \le \texttt{st} < lt_i} \left( \right.&& \\
-    & \bigwedge_{0 \le \texttt{tt} < st} & \texttt{Status i tt} = 0 ~ \wedge \\
-    & \bigwedge_{0 \le \texttt{tt} < rt_i} & \texttt{Status i st+tt} = 1 ~ \wedge \\
-    & \bigwedge_{0 \le \texttt{tt} < T-st-rt_i} & \texttt{Status i tt} = 2 \\
-\left. \right)
-\end{array} \]
-
-Now we have a number of job specific constraints. 
-If we want to express that job a is only allowed to start if job b and c have finished, we write: 
-\[ \bigwedge_{0 \le \texttt{tt} < T} (\texttt{Status a tt} = 1) \rightarrow (\texttt{Status b tt} = 2 \wedge \texttt{Status c tt} = 2) \]
-
-Job 3 may only start if job 1 and 2 have finished.
-\[ \bigwedge_{0 \le \texttt{tt} < T} (\texttt{Status 3 tt} = 1) \rightarrow (\texttt{Status 1 tt} = 2 \wedge \texttt{Status 2 tt} = 2) \]
-Job 5 may only start if job 3 and 4 have finished.
-\[ \bigwedge_{0 \le \texttt{tt} < T} (\texttt{Status 5 tt} = 1) \rightarrow (\texttt{Status 3 tt} = 2 \wedge \texttt{Status 4 tt} = 2) \]
-Job 7 may only start if job 3, 4 and 6 have finished.
-\[ \bigwedge_{0 \le \texttt{tt} < T} (\texttt{Status 7 tt} = 1) \rightarrow (\texttt{Status 3 tt} = 2 \wedge \texttt{Status 4 tt} = 2 \wedge \texttt{Status 6 tt} = 2) \]
-Job 9 may only start if job 5 and 8 have finished.
-\[ \bigwedge_{0 \le \texttt{tt} < T} (\texttt{Status 9 tt} = 1) \rightarrow (\texttt{Status 5 tt} = 2 \wedge \texttt{Status 8 tt} = 2) \]
-Job 11 may only start if job 10 has finished.
-\[ \bigwedge_{0 \le \texttt{tt} < T} (\texttt{Status 11 tt} = 1) \rightarrow (\texttt{Status 10 tt} = 2) \]
-Job 12 may only start if job 9 and 11 have finished.
-\[ \bigwedge_{0 \le \texttt{tt} < T} (\texttt{Status 12 tt} = 1) \rightarrow (\texttt{Status 9 tt} = 2 \wedge \texttt{Status 11 tt} = 2) \]
-
-Another constraint is that job 8 may not start earlier than job 5, in other words, we want that if job 5 starts running, job 8 is either running as well or already finished:
-\[ \bigwedge_{0 \le \texttt{tt} < T} (\texttt{Status 5 tt} = 1) \rightarrow (\texttt{Status 8 tt} > 0) \]
-
-For job 5, 7 and 10 we have that no two of these job may be running at the same time. 
-We introduce a variable $nr_t$ to count the number of running jobs 5, 7 and 10 in timeframe $t$.
-We calculate the value of this integer by summing over jobs 5, 7 and 10 with a simple if-then-else-statement in yices: 
-\[ nr_t = \sum_{i \in \{5,7,10\}} \texttt{ite (= 1 (Status i t)) 1 0} \]
-Now we can enforce the constraint by counting the number of running jobs 5, 7 and 10 in each timeframe, 
-and stating that this number is not allowed to be greater than 1. 
-\[ \bigwedge_{0 \le t < T} nr_t \le 1\]
-
-We filled in a value for the variable time (the length of the timeline) 
-and asked the SMT-solver whether the formule was satisfiable. 
-We used binary search to find the minimal number of time frames needed to schedule all jobs. 
-We found the value 59. 
-Below is a Gantt chart that shows us how the jobs were scheduled within 59 time frames:
-
-\subsection*{Computation steps}
-We start with a set of $N$ variables $a_1, \dots, a_N$ with initial values $1 \dots N$.
-%For all variables except $a_1$ and $a_N$, it is possible to either do nothing, or assign a new value to the variable:
-We want to obtain a variable with the value 157 in a number of steps. 
-In such a step, we choose a variable $a_v$ with $1 < v < N$ and assign it a new value:
-\[ a_v = a_{v-1} + a_{v+1} \]
-We want to find the minimum number of these steps required to get a variable with the value 157.
-We compute this by fixing the number of steps $T$, and then defining a function
-\[\texttt{A :: Int -> Int -> Int}\]
-such that \texttt{A v t} is the value of variable $a_v$ after $t$ steps.
-
-First we define the initial value for all variables:
-\[ \bigwedge_{1 \le \texttt{v} \le N} \texttt{A v 0} = \texttt{v} \]
-Then we define the steps allowed for each variable.
-The $t^\mathtt{th}$ step can be done by precisely one variable $a_v$ in $\{ a_2, \cdots, a_{N-1} \}$.
-This step is done by updating this variable:
-\[\texttt{A v (t+1)} = \texttt{A (v-1) t} + \texttt{A (v+1) t}\]
-And all other variables must remain unchanged:
-\[\bigwedge_{ \texttt{u} \in \{1, \cdots, N\} \setminus \{ \texttt{v} \} } \texttt{A u (t+1)} = \texttt{A u t}\]
-
-This can be done for any step $t$, thus this entire section can be written down with:
-\[
-    \bigwedge_{0 \le \texttt{t} < T}
-    \bigvee_{1 < \texttt{v} < N}
-        \left (\texttt{A v (t+1)} = \texttt{A (v-1) t} + \texttt{A (v+1) t} \right)
-        ~\wedge~
-        \left( \bigwedge_{ \texttt{u} \in \{1, \cdots, N\} \setminus \{ \texttt{v} \} } \texttt{A u (t+1)} = \texttt{A u t} \right)
-\]
-
-Finally we define the end-goal:
-\[ \bigvee_{1 \le \texttt{v} \le N} \texttt{A v T} = 157 \]
-
-%To find the minimum number of steps required, we use binary search on the number of steps $T$.
-To minimize the number of steps, we use binary search on $T$.
-Binary search is applicable because of the following:
-if a variable $a_v$ has the value 157 after $t$ steps, the SMT-solver can pick a variable $a_w$ with $v \ne w$ for all subsequent steps.
-In other words, 
-if the SMT-solver finds that the formula is satisfiable for t steps, 
-the formula is also satisfiable for a larger number of steps.
-
-%Because when a variable $v$ has reachbed the value 157 after $T$ steps, in subsequent steps, the SMT-solver can always pick a variable that does not have the value 157.
-%Since the value of variable $v$ then remains unchanged, the formula is also satisfiable for more than $T$ steps.
-%Thus binary search is applicable in this case.
-
-Our algorithm for binary search concludes that the problem can be solved in at least 10 steps.
-
 \end{document}
