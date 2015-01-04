@@ -34,15 +34,28 @@ $c=1$ may reach $c=99$,
 and give the consecutive values of the variable $c$ 
 before this value $c=99$ is reached.
 
+\paragraph{Solution}
 We have solved this problem using NuSMV. 
 We started out by defining a module \texttt{powersoftwo} for the program $P$.
 Since we want to simulate parallel execution, 
 we have to take into account that the program is not executed all at once. 
 In this module we have a variable $i$ 
 that registers which of the three lines of code will be executed 
-if this instance of $P$ gets some computation time. 
-Since the variable $x$ is local, 
-every instance of $P$ also has its own instance of $x$.
+if this instance of $P$ gets some computation time.
+Because the program runs this code in a loop, this program counter behaves as a ring.
+\[\texttt{next(i) := (i + 1) mod 3;}\]
+Since the variable $x$ is local, every instance of $P$ also has its own instance of $x$.
+This variable is assigned depending on the value of the program counter.
+\[
+    \begin{array}{ll}
+        \texttt{next(x)} & \texttt{:= case} \\
+            & \texttt{i = 0 : c;} \\
+            & \texttt{i = 1 : x + c <= bound ? x + c : bound;} \\
+            & \texttt{TRUE : x;}\\
+        \texttt{esac;}
+    \end{array}
+\]
+
 With the \texttt{next()} function we define the body of the program $P$: every time the module is called, one line from the program $P$ will be executed by the module.
 
 Secondly, we have a module \texttt{main} where
@@ -55,15 +68,17 @@ This way we effectively simulate parallel execution.
 
 \paragraph{Remark}
 Because NuSMV employs bounded model checking, we need to explicitly give a bound for the integer values $x_1$, $x_2$ and $c$.
-The module \texttt{powersoftwo} increases the values of these variables monotonically.
-Thus once the value of these variables is increased beyond $99$, they can never decrease to $99$ again.
-We decided to set the maximum value to $100$.
-Whenever the value increases beyond this point, the maximum value is kept.
-\[\texttt{x + c <= 100 ? x + c : 100;}\]
+Once the value of variable $x$ increases beyond the value under search, it can no longer attribute to the search.
+This because all variables are strictly positive, and only addition is used.
+Note that the value of $x$ is not monotonically increasing, because an older, lower, value can still be assigned.
+We decided to set the maximum value to $100$ when searching for $c = 99$.
+Whenever the value of $x$ increases beyond this point, the maximum value is kept.
+\[\texttt{x + c <= bound ? x + c : bound;}\]
 
 \paragraph{Generalization}
 In our solution the search value $99$ is a constant definition, so that the bound can be adjusted easily across all modules.
 Adding an extra \texttt{powersoftwo} instance is trivial, as it only requires the declaration of this new instance.
+\[\texttt{needle := 99; bound := needle + 1;}\]
 
 \paragraph{Results}
 We found the solution to the problem by asking NuSMV 
