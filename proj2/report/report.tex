@@ -96,7 +96,8 @@ NuSMV found this counterexample in 3.2 seconds.
 \clearpage
 
 \subsection*{Villages and food}
-\paragraph{The problem}Three villages A, B and C consume one food package per time unit. 
+\paragraph{The problem}
+Three villages A, B and C consume one food package per time unit. 
 Food packages are delivered by a truck. 
 
 We need to solve the following problems:
@@ -111,7 +112,8 @@ may consume one food package per time unit;
 \item Figure out what happens if the capacity of the truck is increased to 318 food packages.
 \end{enumerate}
 
-\paragraph{Representation} We start out by defining a module \texttt{village} that registers the maximum capacity and the supply of food packages for a village.
+\paragraph{Representation}
+We start out by defining a module \texttt{village} that registers the maximum capacity and the supply of food packages for a village.
 We also have a module \texttt{truck} that registers 
 the capacity and supply of food packages of the truck and 
 the location of the truck on the graph (A, B, C or S).
@@ -124,50 +126,59 @@ and a variable \emph{state} that registers the state of the truck.
 The truck can be in one of the following states:
 \[\texttt{state : \{Decision, traveltoA, traveltoB, traveltoC, traveltoS, Load, Unload\}}\]
 
-\paragraph{Decision state} Decision is the neutral state. 
+\paragraph{Decision state}
+Decision is the neutral state. 
 We return to this state every time an action is completed. 
 Where we can go from the Decision state is dependent on 
-the location of the truck and the supply of food packages left:\\
-
+the location of the truck and the supply of food packages left:
+\begin{center}
 \begin{tabular}{|l|p{12cm}|}
 \hline
-Decision $\rightarrow$ traveltoA & the current location of the truck is a neighbour of village A\\
-Decision $\rightarrow$ traveltoB & the current location of the truck is a neighbour of village B\\
-Decision $\rightarrow$ traveltoC & the current location of the truck is a neighbour of village C\\
-Decision $\rightarrow$ traveltoS & the current location of the truck is a neighbour of village S\\
+Decision $\rightarrow$ traveltoA & the current location of the truck is a neighbour of village A.\\
+Decision $\rightarrow$ traveltoB & the current location of the truck is a neighbour of village B.\\
+Decision $\rightarrow$ traveltoC & the current location of the truck is a neighbour of village C.\\
+Decision $\rightarrow$ traveltoS & the current location of the truck is a neighbour of village S.\\
 Decision $\rightarrow$ Load & the truck is in S and the supply of food packages
-	is less than the maximum capacity of the truck\\
+	is less than the maximum capacity of the truck.\\
 Decision $\rightarrow$ Unload & the truck is in one of the villages, 
 	the village is not at maximum capacity and 
-	the truck is not empty\\
+	the truck is not empty.\\
 \hline
 \end{tabular}\\
+\end{center}
 
-\paragraph{Action state} When we've chosen an action, we update all variables according to the state we're in:\\
-
+\paragraph{Action state}
+When we've chosen an action, we update all variables according to the state we're in:
+\begin{center}
 \begin{tabular}{|l|p{12cm}|}
 \hline
-variable changes&\\
 traveltoA & all villages consume food packages 
-	depending on the time it takes the truck to reach this location\\
-traveltoB & all villages consume food packages\\
-traveltoC & all villages consume food packages\\
-traveltoS & all villages consume food packages\\
-Load & truck supply is at maximum capacity\\ 
+	depending on the time it takes the truck to reach this location, and the truck moves there.\\
+traveltoB & same as traveltoA.\\
+traveltoC & same as traveltoA.\\
+traveltoS & same as traveltoA.\\
+Load & truck supply is filled to maximum capacity.\\ 
 Unload & village supply of food packages increases, 
-	truck supply decreases\\
+	truck supply decreases accordingly.\\
 \hline
 \end{tabular}
+\end{center}
 
 When all variables are updated according to the current state, 
 the state returns to the value Decision.
-Finally we added predicates \texttt{starvation} for every villages, which are true when the village has run out of food packages to consume.
+Finally we added the predicate \texttt{starvation} for every village, which is true when the village has run out of food packages to consume.
 
-\paragraph{Remark about unloading} At first, we let the NuSMV choose how much packages the truck would unload in a village by stating that every Unload action would transfer only one packages from the truck to the village. By choosing Unload multiple times before choosing a Travel state, the truck would unload multiple packages.
-
+\paragraph{Remark about unloading}
+At first, we let the NuSMV choose how much packages the truck would unload in a village by stating that every Unload action would transfer only one packages from the truck to the village.
+By choosing Unload multiple times before choosing a Travel state, the truck would unload multiple packages.
 Because of this, the state space became quite big and it took NuSMV 40 hours to check our model.
 
-We then reduced the state space by changing the Unload action as follows: the truck now unloads as much food packages as possible, either until the truck is empty or the village is full. NuSMV then took only 20 minutes to check the model.
+We made a separate model with a reduced state space by changing the Unload action as follows:
+the truck unloads as much food packages as possible, either until the truck is empty or the village is full.
+NuSMV takes only 20 minutes to check this reduced model.
+
+It could be that some working strategy is no longer possible in the reduced model.
+If for the reduced model NuSMV deduces a strategy for which starvation can never occur, this strategy can also be applied in the complete model.
 
 \paragraph{Answers} NuSMV found the following answers to the questions:
 \begin{enumerate}
