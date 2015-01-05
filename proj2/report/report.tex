@@ -246,9 +246,35 @@ whenever $C_{seq}$ has the same length $n$ as $A_{seq}$,
 and a predicate \texttt{Aseq\_Cseq\_equal} that is true 
 if the contents of $A_{seq}$ and $C_{seq}$ are exactly the same.
 
+<<<<<<< HEAD
 Then we asked NuSMV to check the following CTL specification:
 \[ \texttt{CTLSPEC AG (Cseq\_full -> Aseq\_Cseq\_eq)} \]
 NuSMV returned \texttt{true}.
+=======
+\subsection*{Crossing bridge with one flashlight}
+\paragraph{The problem}
+
+This problem was taken verbatim from a paper by G\"unter Rote. \cite{rote2002crossing}
+
+\begin{quotation}
+Four people begin on the same side of a bridge.
+You must help them across to the other side.
+It is night.
+There is one flashlight.
+A maximum of two people can cross at a time.
+Any party who crosses, either one or two people, must have the flashlight to see.
+The flashlight must be walked back and forth, it cannot be thrown, etc.
+Each person walks at a different speed.
+A pair must walk together at the rate of the slower person's pace, based on this information:
+Person 1 takes $t_1$ = 1 minutes to cross, and the other persons take $t_2$ = 2
+minutes, $t_3$ = 5 minutes, and $t_4$ = 10 minutes to cross, respectively.
+\end{quotation}
+
+For which order of crossings is the amount of time necessary minimal?
+
+\paragraph{Solution}
+We solved this problem using NuSMV.
+>>>>>>> b418b6c... proj2/report: added ex 4 stub
 
 
 
