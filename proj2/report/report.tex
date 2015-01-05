@@ -196,4 +196,40 @@ NuSMV returned \texttt{true} after 19 minutes.
 \[\texttt{EG !((village\_A.starvation | village\_B.starvation) | village\_C.starvation)} \]
 NuSMV returned \texttt{false} after 12 minutes.
 \end{enumerate}
+
+\clearpage
+
+\subsection*{Alternating bit protocol}
+\paragraph{The problem} We have a description of the alternating bit protocol,
+which makes use of two memory places $A$ and $C$, two channels $B$ and $D$ and two locations $S$ and $R$. We have to prove correctness of the described protocol.
+
+\paragraph{Representation} We start out by defining a module \texttt{channel} for $B$ and $D$, in which we register the values $f$ and $b$. We also have a module \texttt{alternatingbitcell} for $S$ and $R$ where we register the value of $b$. Finally we have a module for the sequences $A_{seq}$ and $B_{seq}$ since NuSMV is not very good at dealing with arrays.
+
+We have implemented the protocol as a state machine 
+based on the steps A,B,C,D,E,F from the description of the protocol. 
+In the main module, we have a variable \texttt{step}
+that registers the current state of the state machine, 
+that can have the following values:
+\[ \texttt{step : \{Decision, stepA, stepB, stepC, stepD, stepE, stepF\};}\]
+
+We start out in the Decision state. 
+From the Decision state, we non-deterministically choose one of the steps. 
+Which steps are valid depends on the contents of $S$, $R$, $D$ and $B$.
+Steps A-D can always happen. 
+For E and F there are some extra requirements. 
+
+Whenever we are in a state that corresponds to one of the steps A-F, 
+we alter the contents of $S$, $R$, $D$ and $B$ according 
+to the description of the protocol. 
+After this we return to the Decision state.
+
+To prove the correctness of the protocol, 
+we added a predicate \texttt{C\_seq\_full} that is true 
+whenever $C_{seq}$ has the same length $n$ as $A_{seq}$, 
+and a predicate \texttt{Aseq\_Cseq\_equal} that is true 
+if the contents of $A_{seq}$ and $C_{seq}$ are exactly the same.
+
+
+
+
 \end{document}
