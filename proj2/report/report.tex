@@ -88,18 +88,8 @@ which states that it's never possible that c reaches the value 99.
 NuSMV proved the statement false and 
 provided us with a trace as a counter-example.
 
-The consecutive values of $c$ before it reaches $99$ are as follows:
-\begin{verbatim}
-  c = 1
-  c = 2
-  c = 3
-  c = 6
-  c = 12
-  c = 24
-  c = 48
-  c = 51
-  c = 99
-\end{verbatim}
+The sequence of values of $c$ before it reaches $99$, $C$, for this counterexample is as follows:
+\[ C = ( 1, 2, 3, 6, 12, 24, 48, 51, 99 ) \]
 
 NuSMV found this counterexample in 3.2 seconds.
 
