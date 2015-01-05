@@ -327,12 +327,9 @@ In order to make sure that no more than two people, and always at least one pers
     \end{array}
 \]
 
-%Then in the \texttt{Traveling} \texttt{state}, the \texttt{side} and \texttt{flashlight} change location:
-%\[ \texttt{state = Traveling \& traveling : side\_inv;} \]
-%\[ \texttt{state = Traveling : flashlight = origin ? destination : origin;} \]
-Once we are in \texttt{Traveling} step, we change the location of all traveling people and the flashlight to the opposite side of the bridge. Finally we increase the time by the traveltime of the slowest traveler.
-%And the time is updated within the time bound by the traveltime of the slowest \texttt{person}:
-\[ \texttt{state = Traveling : time + max\_p1235 < bound ? time + max\_p1234 : bound;} \]
+Once we are in \texttt{Traveling} step, we change the location of all traveling people and the flashlight to the opposite side of the bridge.
+Finally we increase the \texttt{time} by the \texttt{traveltime} of the slowest traveler, within the time bound:
+\[ \texttt{state = Traveling : time + max\_p1234 < bound ? time + max\_p1234 : bound;} \]
 
 Determining this maximum traveltime of the traveling people is made simpler by a small hack.
 We decided to define a dependant traveltime based on whether a \texttt{person} is \texttt{traveling}:
