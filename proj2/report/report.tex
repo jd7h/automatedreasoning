@@ -202,24 +202,29 @@ Thus with this truck a village will always starve.
 \clearpage
 
 \subsection*{Alternating bit protocol}
-\paragraph{The problem} We have a description of the alternating bit protocol,
-which makes use of two memory places $A$ and $C$, two channels $B$ and $D$ and two locations $S$ and $R$. We have to prove correctness of the described protocol.
+\paragraph{The problem}
+We have a description of the alternating bit protocol,
+which makes use of two memory places $A$ and $C$, two channels $B$ and $D$ and two locations $S$ and $R$.
+We have to prove correctness of the described protocol.
 
-\paragraph{Representation} We start out by defining a module \texttt{channel} 
-for $B$ and $D$, in which we register the values $f$ and $b$ and the value $B_{datum}$.
+\paragraph{Representation}
+We start out by defining a module \texttt{channel} 
+for $B$ and $D$, in which we register the values $f$ and $b$.
 We also have a module \texttt{alternatingbitcell} for $S$ and $R$ 
 where we register the value of $b$. 
+Separately we define the variable $B_{datum}$ in the \texttt{main} module.
 Finally we have a module for the sequences $A_{seq}$ and $B_{seq}$ since NuSMV does not have sophisticated support for sequences.
 
-\paragraph{State machine} We have implemented the protocol as a state machine 
-based on the steps A,B,C,D,E,F from the description of the protocol. 
+\paragraph{State machine}
+We have implemented the protocol as a state machine 
+based on the steps A, B, C, D, E and F from the description of the protocol. 
 In the main module, we have a variable \texttt{step}
 that registers the current state of the state machine, 
 that can have the following values:
 \[ \texttt{step : \{Decision, stepA, stepB, stepC, stepD, stepE, stepF\};}\]
 
-We start out in the Decision state. 
-From the Decision state, we non-deterministically choose one of the steps. 
+We start out in the \texttt{Decision} state. 
+From the \texttt{Decision} state, we non-deterministically choose one of the steps. 
 Which steps are valid depends on the contents of $S$, $R$, $D$ and $B$.
 Steps A-D can always happen. 
 For E and F there are some extra requirements. 
@@ -243,7 +248,17 @@ StepF & $C_{seq}[i] := B_{datum}$, writing index $i$ of $C_{seq}$ is incremented
 \end{center}
 After updating all relevant variables we return to the Decision state.
 
-\paragraph{Correctness} To prove the correctness of the protocol, 
+\paragraph{Generalization}
+The channels $B$ and $D$ are not symmetric.
+The logic for these channels could thus not be implemented in their \texttt{channel} module, but had to be implemented in the \texttt{main} module.
+As a result more channels can not be easily added, if one would ever want to.
+
+Furthermore the length of the message in $A_{seq}$ is fixed can not be increased without adding more lines of code.
+NuSMV does not allow the comparison or assignment of entire arrays, and only allows these operations to be done elementwise.
+These lines of code are however very simple, and thus sequences of greater length can be checked relatively easy.
+
+\paragraph{Correctness}
+To prove the correctness of the protocol, 
 we added a predicate \texttt{C\_seq\_full} that is true 
 whenever $C_{seq}$ has the same length $n$ as $A_{seq}$, 
 and a predicate \texttt{Aseq\_Cseq\_equal} that is true 
@@ -253,7 +268,7 @@ Then we asked NuSMV to check the following CTL specification:
 \[ \texttt{CTLSPEC AG (Cseq\_full -> Aseq\_Cseq\_eq)} \]
 NuSMV returned \texttt{true} within 0.016 seconds.
 
-Unfortunately the specification `eventually the data arrives intact', is not true:
+Unfortunately the specification for `eventually the data arrives intact', is not true:
 \[ \texttt{CTLSPEC AF (Cseq\_full \& Aseq\_Cseq\_eq)} \]
 Due to the possible path where frequently enough packet loss occurs, such that the data never arrives.
 
