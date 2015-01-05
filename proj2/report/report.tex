@@ -203,9 +203,13 @@ NuSMV returned \texttt{false} after 12 minutes.
 \paragraph{The problem} We have a description of the alternating bit protocol,
 which makes use of two memory places $A$ and $C$, two channels $B$ and $D$ and two locations $S$ and $R$. We have to prove correctness of the described protocol.
 
-\paragraph{Representation} We start out by defining a module \texttt{channel} for $B$ and $D$, in which we register the values $f$ and $b$. We also have a module \texttt{alternatingbitcell} for $S$ and $R$ where we register the value of $b$. Finally we have a module for the sequences $A_{seq}$ and $B_{seq}$ since NuSMV is not very good at dealing with arrays.
+\paragraph{Representation} We start out by defining a module \texttt{channel} 
+for $B$ and $D$, in which we register the values $f$ and $b$ and the value $B_{datum}$.
+We also have a module \texttt{alternatingbitcell} for $S$ and $R$ 
+where we register the value of $b$. 
+Finally we have a module for the sequences $A_{seq}$ and $B_{seq}$ since NuSMV is not very good at dealing with arrays.
 
-We have implemented the protocol as a state machine 
+\paragraph{State machine} We have implemented the protocol as a state machine 
 based on the steps A,B,C,D,E,F from the description of the protocol. 
 In the main module, we have a variable \texttt{step}
 that registers the current state of the state machine, 
@@ -218,17 +222,33 @@ Which steps are valid depends on the contents of $S$, $R$, $D$ and $B$.
 Steps A-D can always happen. 
 For E and F there are some extra requirements. 
 
+\paragraph{Variable changes}
 Whenever we are in a state that corresponds to one of the steps A-F, 
 we alter the contents of $S$, $R$, $D$ and $B$ according 
-to the description of the protocol. 
-After this we return to the Decision state.
+to the description of the protocol:\\
 
-To prove the correctness of the protocol, 
+\begin{tabular}{|l|p{12cm}|}
+\hline
+StepA & $B_f$ is false\\
+StepB & $D_f$ is false\\
+StepC & $B_b := S_b$, $B_{datum} = A_{seq}[i]$, $B_f$ is true\\
+StepD & $D_b := !R_b$, $D_f$ is true; \\
+StepE & Reading index $i$ of $A_{seq}$ is incremented, $S_b := !S_b$\\
+StepF & $C_{seq} := B_{datum}$, writing index $i$ of $C_{seq}$ is incremented.\\
+\hline
+\end{tabular}
+
+After updating all relevant variables we return to the Decision state.
+
+\paragraph{Correctness} To prove the correctness of the protocol, 
 we added a predicate \texttt{C\_seq\_full} that is true 
 whenever $C_{seq}$ has the same length $n$ as $A_{seq}$, 
 and a predicate \texttt{Aseq\_Cseq\_equal} that is true 
 if the contents of $A_{seq}$ and $C_{seq}$ are exactly the same.
 
+Then we asked NuSMV to check the following CTL specification:
+\[ \texttt{CTLSPEC AG (Cseq\_full -> Aseq\_Cseq\_eq)} \]
+NuSMV returned \texttt{true}.
 
 
 
