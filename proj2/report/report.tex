@@ -209,7 +209,7 @@ which makes use of two memory places $A$ and $C$, two channels $B$ and $D$ and t
 for $B$ and $D$, in which we register the values $f$ and $b$ and the value $B_{datum}$.
 We also have a module \texttt{alternatingbitcell} for $S$ and $R$ 
 where we register the value of $b$. 
-Finally we have a module for the sequences $A_{seq}$ and $B_{seq}$ since NuSMV is not very good at dealing with arrays.
+Finally we have a module for the sequences $A_{seq}$ and $B_{seq}$ since NuSMV does not have sophisticated support for sequences.
 
 \paragraph{State machine} We have implemented the protocol as a state machine 
 based on the steps A,B,C,D,E,F from the description of the protocol. 
@@ -227,8 +227,9 @@ For E and F there are some extra requirements.
 \paragraph{Variable changes}
 Whenever we are in a state that corresponds to one of the steps A-F, 
 we alter the contents of $S$, $R$, $D$ and $B$ according 
-to the description of the protocol:\\
+to the description of the protocol:
 
+\begin{center}
 \begin{tabular}{|l|p{12cm}|}
 \hline
 StepA & $B_f$ is false\\
@@ -236,10 +237,10 @@ StepB & $D_f$ is false\\
 StepC & $B_b := S_b$, $B_{datum} = A_{seq}[i]$, $B_f$ is true\\
 StepD & $D_b := !R_b$, $D_f$ is true; \\
 StepE & Reading index $i$ of $A_{seq}$ is incremented, $S_b := !S_b$\\
-StepF & $C_{seq} := B_{datum}$, writing index $i$ of $C_{seq}$ is incremented.\\
+StepF & $C_{seq}[i] := B_{datum}$, writing index $i$ of $C_{seq}$ is incremented.\\
 \hline
 \end{tabular}
-
+\end{center}
 After updating all relevant variables we return to the Decision state.
 
 \paragraph{Correctness} To prove the correctness of the protocol, 
@@ -250,7 +251,11 @@ if the contents of $A_{seq}$ and $C_{seq}$ are exactly the same.
 
 Then we asked NuSMV to check the following CTL specification:
 \[ \texttt{CTLSPEC AG (Cseq\_full -> Aseq\_Cseq\_eq)} \]
-NuSMV returned \texttt{true}.
+NuSMV returned \texttt{true} within 0.016 seconds.
+
+Unfortunately the specification `eventually the data arrives intact', is not true:
+\[ \texttt{CTLSPEC AF (Cseq\_full \& Aseq\_Cseq\_eq)} \]
+Due to the possible path where frequently enough packet loss occurs, such that the data never arrives.
 
 \subsection*{Crossing bridge with one flashlight}
 \paragraph{The problem}
