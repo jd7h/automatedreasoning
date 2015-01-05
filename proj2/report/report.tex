@@ -280,9 +280,10 @@ For which order of crossings is the amount of time necessary minimal?
 
 \paragraph{Solution}
 We solved this problem using NuSMV.
-In our solution first one or two people are chosen to cross the bridge.
-Next, they actually move to the other side along with the flashlight, and the time progresses.
-In order to find this minimal time value required for everyone to have crossed the bridge, we use binary search using a time bound.
+Our solution consists of two steps:
+In the first step we choose one or two people to cross the bridge.
+In the next step, they actually move to the other side of the bridge, along with the flashlight, and the time progresses.
+In order to find the minimal amount of time required for everyone to have crossed the bridge, we use binary search using a time bound.
 
 The bridge has two sides: \texttt{origin} and \texttt{destination}, which we designate as `locations'.
 Our \texttt{main} module contains the variables:
@@ -291,13 +292,13 @@ Our \texttt{main} module contains the variables:
 \item \texttt{flashlight}, the current location of the flashlight.
 \item \texttt{state}, with the values \texttt{Decision} and \texttt{Traveling}. During \texttt{Decision} the model decides who will travel to the other side, before actually processing the travel action of those people in \texttt{Traveling}.
 \item $p_n$, for each person $n$, the module \texttt{person} instantiated.
-    Each person has their \texttt{traveltime} passed to them.
+    Each person has \texttt{traveltime} passed as a parameter, ie. the time it takes that particular person to cross the bridge.
 \end{enumerate}
 
 Our \texttt{person} module contains the variables:
 \begin{enumerate}
 \item \texttt{side}, the location of the person.
-\item \texttt{traveling}, a boolean signifying whether or not the person will or is traveling to the other side of the bridge.
+\item \texttt{traveling}, a boolean signifying whether or not this person will will travel to the other side of the bridge during the \texttt{Traveling} step.
 \end{enumerate}
 
 For every \texttt{person}, if the \texttt{state} is \texttt{Decision} and \texttt{flashlight} is on the same \texttt{side} as the \texttt{person}, the \texttt{person} can decide to cross the bridge or to stay.
@@ -311,12 +312,12 @@ In order to make sure that no more than two people, and always at least one pers
     \end{array}
 \]
 
-Then in the \texttt{Traveling} \texttt{state}, the \texttt{side} and \texttt{flashlight} change location:
-\[ \texttt{state = Traveling \& traveling : side\_inv;} \]
-\[ \texttt{state = Traveling : flashlight = origin ? destination : origin;} \]
-
-And the time is updated within the time bound by the traveltime of the slowest \texttt{person}:
-\[ \texttt{state = Traveling : time + max\_p1234 < bound ? time + max\_p1234 : bound;} \]
+%Then in the \texttt{Traveling} \texttt{state}, the \texttt{side} and \texttt{flashlight} change location:
+%\[ \texttt{state = Traveling \& traveling : side\_inv;} \]
+%\[ \texttt{state = Traveling : flashlight = origin ? destination : origin;} \]
+Once we are in \texttt{Traveling} step, we change the location of all traveling people and the flashlight to the opposite side of the bridge. Finally we increase the time by the traveltime of the slowest traveler.
+%And the time is updated within the time bound by the traveltime of the slowest \texttt{person}:
+\[ \texttt{state = Traveling : time + max\_p1235 < bound ? time + max\_p1234 : bound;} \]
 
 Determining this maximum traveltime of the traveling people is made simpler by a small hack.
 We decided to define a dependant traveltime based on whether a \texttt{person} is \texttt{traveling}:
