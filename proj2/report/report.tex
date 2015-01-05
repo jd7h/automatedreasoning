@@ -263,7 +263,83 @@ For which order of crossings is the amount of time necessary minimal?
 
 \paragraph{Solution}
 We solved this problem using NuSMV.
+In our solution first one or two people are chosen to cross the bridge.
+Next, they actually move to the other side along with the flashlight, and the time progresses.
+In order to find this minimal time value required for everyone to have crossed the bridge, we use binary search using a time bound.
 
+The bridge has two sides: \texttt{origin} and \texttt{destination}, which we designate as `locations'.
+Our \texttt{main} module contains the variables:
+\begin{enumerate}
+\item \texttt{time}, which is bounded by the constant time bound for the search.
+\item \texttt{flashlight}, the current location of the flashlight.
+\item \texttt{state}, with the values \texttt{Decision} and \texttt{Traveling}. During \texttt{Decision} the model decides who will travel to the other side, before actually processing the travel action of those people in \texttt{Traveling}.
+\item $p_n$, for each person $n$, the module \texttt{person} instantiated.
+    Each person has their \texttt{traveltime} passed to them.
+\end{enumerate}
 
+Our \texttt{person} module contains the variables:
+\begin{enumerate}
+\item \texttt{side}, the location of the person.
+\item \texttt{traveling}, a boolean signifying whether or not the person will or is traveling to the other side of the bridge.
+\end{enumerate}
+
+For every \texttt{person}, if the \texttt{state} is \texttt{Decision} and \texttt{flashlight} is on the same \texttt{side} as the \texttt{person}, the \texttt{person} can decide to cross the bridge or to stay.
+\[ \texttt{state = Decision \& flashlight = side : \{TRUE, FALSE\};} \]
+
+In order to make sure that no more than two people, and always at least one person decides to cross the bridge, we add an invariant:
+\[
+    \begin{array}{ll}
+        \texttt{ INVAR } & \texttt{ state = Traveling -> } \\
+        & \texttt{ count(p1.traveling, p2.traveling, p3.traveling, p4.traveling) in 1..2; } \\
+    \end{array}
+\]
+
+Then in the \texttt{Traveling} \texttt{state}, the \texttt{side} and \texttt{flashlight} change location:
+\[ \texttt{state = Traveling \& traveling : side\_inv;} \]
+\[ \texttt{state = Traveling : flashlight = origin ? destination : origin;} \]
+
+And the time is updated within the time bound by the traveltime of the slowest \texttt{person}:
+\[ \texttt{state = Traveling : time + max\_p1234 < bound ? time + max\_p1234 : bound;} \]
+
+Determining this maximum traveltime of the traveling people is made simpler by a small hack.
+We decided to define a dependant traveltime based on whether a \texttt{person} is \texttt{traveling}:
+\[ \texttt{traveltime\_dep := traveling ? traveltime : 0;} \]
+And taking the maximum value of these dependant traveltimes.
+
+For the binary search, the bound can easily be changed as in the first exercise on Parallel execution:
+\[\texttt{needle := 17; bound := needle + 1;}\]
+
+In order to check whether the crossing can be done using at most a certain amount of time, we check the following expression:
+\[ \texttt{CTLSPEC EF (crossing\_done \& time <= needle);} \]
+
+Then, when we find a good candidate for the value of \texttt{needle}, we check the following expression to be sure that it is minimal:
+\[ \texttt{CTLSPEC AG !(crossing\_done \& time < needle);} \]
+
+\paragraph{Generalization}
+Unfortunately, a \texttt{person} cannot be added easily, because there is no easy way to compute the maximum dependant traveltime for any number of people.
+For our four people, first the maximum dependant traveltime of $p_1$ and $p_2$ is computed, and the same is computed for $p_3$ and $p_4$.
+Finally the maximum value of these two maxima is computed.
+In general this method requires $n-1$ computations of the maximum value, where $n$ is the number of people.
+
+\paragraph{Results}
+We found that the minimal amount of time required to travel from one side to the other is $17$ time units.
+
+An example trace was found by running the following expression:
+\[ \texttt{CTLSPEC AG !(crossing\_done \& time <= needle)} \]
+
+This trace goes as follows:
+\begin{enumerate}
+\item $t = 0$, $p_1$ and $p_2$ go to the \texttt{destination}.
+\item $t = 2$, $p_1$ goes back with the flashlight.
+\item $t = 3$, $p_3$ and $p_4$ go to the \texttt{destination}.
+\item $t = 13$, $p_2$ goes back with the flashlight.
+\item $t = 15$, $p_1$ and $p_2$ go to the \texttt{destination} again.
+\item $t = 17$, all have reached the \texttt{destination}.
+\end{enumerate}
+
+NuSMV computes this within 0.012 seconds.
+
+\bibliography{report}{}
+\bibliographystyle{plain}
 
 \end{document}
