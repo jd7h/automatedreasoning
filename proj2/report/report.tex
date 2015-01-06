@@ -68,7 +68,7 @@ This way we effectively simulate parallel execution.
 
 \paragraph{Remark}
 Because NuSMV employs bounded model checking, we need to explicitly give a bound for the integer values $x_1$, $x_2$ and $c$.
-Once the value of variable $x$ increases beyond the value under search, it can no longer attribute to the search.
+Once the value of variable $x$ increases beyond the value under search, \texttt{needle}, it can no longer attribute to the search.
 This because all variables are strictly positive, and only addition is used.
 Note that the value of $x$ is not monotonically increasing, because an older, lower, value can still be assigned.
 We decided to set the maximum value to $100$ when searching for $c = 99$.
@@ -77,18 +77,18 @@ Whenever the value of $x$ increases beyond this point, the maximum value is kept
 
 \paragraph{Generalization}
 In our solution the search value $99$ is a constant definition, so that the bound can be adjusted easily across all modules.
-Adding an extra \texttt{powersoftwo} instance is trivial, as it only requires the declaration of this new instance.
 \[\texttt{needle := 99; bound := needle + 1;}\]
+Also adding an extra \texttt{powersoftwo} instance is trivial, as it only requires the declaration of this new instance.
 
 \paragraph{Results}
 We found the solution to the problem by asking NuSMV 
 to verify the following CTL specification:
-\[\texttt{CTLSPEC AG !(c=99)}\]
+\[\texttt{CTLSPEC AG !(c = needle)}\]
 which states that it's never possible that c reaches the value 99.
 NuSMV proved the statement false and 
 provided us with a trace as a counter-example.
 
-The sequence of values of $c$ before it reaches $99$, $C$, for this counterexample is as follows:
+For this counterexample the sequence of values of $c$ before $c$ reaches $99$, which we named $C$, is as follows:
 \[ C = ( 1, 2, 3, 6, 12, 24, 48, 51, 99 ) \]
 
 NuSMV found this counterexample in 3.2 seconds.
