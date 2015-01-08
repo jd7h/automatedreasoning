@@ -193,6 +193,43 @@ NuSMV returned \texttt{true} after 18 minutes.
 which states that there is a trace where we never encounter starvation.
 NuSMV returned \texttt{true} after 19 minutes.
 
+We computed an example trace with the following CTL specification:
+\[ \texttt{AF ((village\_A.starvation | village\_B.starvation) | village\_C.starvation)} \]
+
+Which returned \texttt{false} and the following trace as a counterexample, in which $i$ signifies the NuSMV state number in which the truck has performed the described Action in the current Village:
+\begin{center}
+    \begin{tabular}{|r|cl|r||rrr|}
+        \hline
+        $i$ & Village & Action & $s_t$ & $s_A$ & $s_B$ & $s_C$ \\
+        \hline
+        1 & S & - & 320 & 50 & 40 & 150 \\
+        5 & B & Unload & 219 & 29 & 120 & 129 \\
+        9 & A & Unload & 111 & 120 & 103 & 112 \\
+        13 & B & Unload & 77 & 103 & 120 & 95 \\
+        17 & S & Load & 320 & 82 & 99 & 74 \\
+        21 & A & Unload & 253 & 120 & 70 & 45 \\
+        25 & C & Unload & 66 & 88 & 38 & 200 \\
+        29 & B & Unload & 0 & 51 & 67 & 163 \\
+        33 & S & Load & 320 & 30 & 46 & 142 \\
+        37 & A & Unload & 201 & 120 & 17 & 113 \\
+        41 & B & Unload & 81 & 103 & 120 & 96 \\
+        45 & S & Load & 320 & 82 & 99 & 75 \\
+        \hline \hline
+        49 & A & Unload & 253 & 120 & 70 & 46 \\
+        53 & C & Unload & 67 & 88 & 38 & 200 \\
+        57 & B & Unload & 0 & 51 & 68 & 163 \\
+        61 & S & Load & 320 & 30 & 47 & 142 \\
+        65 & A & Unload & 201 & 120 & 18 & 113 \\
+        69 & B & Unload & 82 & 103 & 120 & 96 \\
+        73 & S & Load & 320 & 82 & 99 & 75 \\
+        \hline
+    \end{tabular}
+\end{center}
+
+In each row the supply of village $A$ in state $i$ is denoted by the value in the $s_A$ column.
+The trace enters a loop after state 45, denoted by the two horizontal lines in the table.
+Because the truck is able to loop indefinitely using this strategy, returning to the same worldwide supply of food each time, we show that no starvation occurs.
+
 \item We changed the truck capacity to 318 and checked the CTL specification
 \[\texttt{EG !((village\_A.starvation | village\_B.starvation) | village\_C.starvation)} \]
 NuSMV returned \texttt{false} after 12 minutes.
@@ -271,6 +308,8 @@ NuSMV returned \texttt{true} within 0.016 seconds.
 Unfortunately the specification for `eventually the data arrives intact', is not true:
 \[ \texttt{CTLSPEC AF (Cseq\_full \& Aseq\_Cseq\_eq)} \]
 Due to the possible path where frequently enough packet loss occurs, such that the data never arrives.
+
+\clearpage
 
 \subsection*{Crossing bridge with one flashlight}
 \paragraph{The problem}
