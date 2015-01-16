@@ -1,0 +1,22 @@
+digraph{
+
+	graph 	[center=1 rankdir=LR]
+
+	{
+	edge [color="red"];
+		A -> E
+		H -> C
+		G -> I
+		D -> J
+		F -> B
+	}
+
+	{
+	edge [color="blue"];
+		E -> H
+		C -> G
+		I -> D
+		J -> F
+	}
+
+}

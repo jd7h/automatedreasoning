@@ -1,0 +1,444 @@
+============================== Prover9 ===============================
+Prover9 (32) version 2009-02A, February 2009.
+Process 13274 was started by judith on anansi,
+Fri Jan 16 10:09:48 2015
+The command was "prover9 -f extra_ex_a.in".
+============================== end of head ===========================
+
+============================== INPUT =================================
+
+% Reading from file extra_ex_a.in
+
+
+formulas(assumptions).
+blue(x,y) -> blue(y,x).
+red(x,y) -> red(y,x).
+blue(x,y) -> bp(x,y).
+red(x,y) -> rp(x,y).
+bp(x,y) & red(y,z) -> rp(x,z).
+rp(x,y) & blue(y,z) -> bp(x,z).
+red(a,c) | red(a,e) | red(a,g).
+-(red(a,c) & red(a,e) & red(a,g)).
+-(red(a,c) & red(a,e)).
+-(red(a,c) & red(a,g)).
+-(red(a,e) & red(a,g)).
+red(b,f) & red(b,i) & red(c,h) & red(d,j) & red(e,i) & red(g,i) & red(i,j).
+blue(d,a) | blue(d,b).
+-(blue(d,a) & blue(d,b)).
+blue(c,g) & blue(d,i) & blue(e,h) & blue(f,j) & blue(g,h).
+end_of_list.
+
+formulas(goals).
+rp(a,b) | bp(a,b).
+end_of_list.
+
+============================== end of input ==========================
+
+============================== PROCESS NON-CLAUSAL FORMULAS ==========
+
+% Formulas that are not ordinary clauses:
+1 blue(x,y) -> blue(y,x) # label(non_clause).  [assumption].
+2 red(x,y) -> red(y,x) # label(non_clause).  [assumption].
+3 blue(x,y) -> bp(x,y) # label(non_clause).  [assumption].
+4 red(x,y) -> rp(x,y) # label(non_clause).  [assumption].
+5 bp(x,y) & red(y,z) -> rp(x,z) # label(non_clause).  [assumption].
+6 rp(x,y) & blue(y,z) -> bp(x,z) # label(non_clause).  [assumption].
+7 -(red(a,c) & red(a,e) & red(a,g)) # label(non_clause).  [assumption].
+8 -(red(a,c) & red(a,e)) # label(non_clause).  [assumption].
+9 -(red(a,c) & red(a,g)) # label(non_clause).  [assumption].
+10 -(red(a,e) & red(a,g)) # label(non_clause).  [assumption].
+11 red(b,f) & red(b,i) & red(c,h) & red(d,j) & red(e,i) & red(g,i) & red(i,j) # label(non_clause).  [assumption].
+12 -(blue(d,a) & blue(d,b)) # label(non_clause).  [assumption].
+13 blue(c,g) & blue(d,i) & blue(e,h) & blue(f,j) & blue(g,h) # label(non_clause).  [assumption].
+14 rp(a,b) | bp(a,b) # label(non_clause) # label(goal).  [goal].
+
+============================== end of process non-clausal formulas ===
+
+============================== PROCESS INITIAL CLAUSES ===============
+
+% Clauses before input processing:
+
+formulas(usable).
+end_of_list.
+
+formulas(sos).
+-blue(x,y) | blue(y,x).  [clausify(1)].
+-red(x,y) | red(y,x).  [clausify(2)].
+-blue(x,y) | bp(x,y).  [clausify(3)].
+-red(x,y) | rp(x,y).  [clausify(4)].
+-bp(x,y) | -red(y,z) | rp(x,z).  [clausify(5)].
+-rp(x,y) | -blue(y,z) | bp(x,z).  [clausify(6)].
+red(a,c) | red(a,e) | red(a,g).  [assumption].
+-red(a,c) | -red(a,e) | -red(a,g).  [clausify(7)].
+-red(a,c) | -red(a,e).  [clausify(8)].
+-red(a,c) | -red(a,g).  [clausify(9)].
+-red(a,e) | -red(a,g).  [clausify(10)].
+red(b,f).  [clausify(11)].
+red(b,i).  [clausify(11)].
+red(c,h).  [clausify(11)].
+red(d,j).  [clausify(11)].
+red(e,i).  [clausify(11)].
+red(g,i).  [clausify(11)].
+red(i,j).  [clausify(11)].
+blue(d,a) | blue(d,b).  [assumption].
+-blue(d,a) | -blue(d,b).  [clausify(12)].
+blue(c,g).  [clausify(13)].
+blue(d,i).  [clausify(13)].
+blue(e,h).  [clausify(13)].
+blue(f,j).  [clausify(13)].
+blue(g,h).  [clausify(13)].
+-rp(a,b).  [deny(14)].
+-bp(a,b).  [deny(14)].
+end_of_list.
+
+formulas(demodulators).
+end_of_list.
+
+============================== PREDICATE ELIMINATION =================
+
+Eliminating bp/2
+15 -bp(x,y) | -red(y,z) | rp(x,z).  [clausify(5)].
+16 -blue(x,y) | bp(x,y).  [clausify(3)].
+Derived: -red(x,y) | rp(z,y) | -blue(z,x).  [resolve(15,a,16,b)].
+17 -rp(x,y) | -blue(y,z) | bp(x,z).  [clausify(6)].
+Derived: -rp(x,y) | -blue(y,z) | -red(z,u) | rp(x,u).  [resolve(17,c,15,a)].
+18 -bp(a,b).  [deny(14)].
+Derived: -blue(a,b).  [resolve(18,a,16,b)].
+Derived: -rp(a,x) | -blue(x,b).  [resolve(18,a,17,c)].
+
+============================== end predicate elimination =============
+
+Auto_denials:  (non-Horn, no changes).
+
+Term ordering decisions:
+Predicate symbol precedence:  predicate_order([ red, blue, rp ]).
+Function symbol precedence:  function_order([ i, a, d, g, b, c, e, h, j, f ]).
+After inverse_order:  (no changes).
+Unfolding symbols: (none).
+
+Auto_inference settings:
+  % set(binary_resolution).  % (non-Horn)
+  % set(neg_ur_resolution).  % (non-Horn, less than 100 clauses)
+
+Auto_process settings:
+  % set(factor).  % (non-Horn)
+  % set(unit_deletion).  % (non-Horn)
+
+kept:      19 -blue(x,y) | blue(y,x).  [clausify(1)].
+kept:      20 -red(x,y) | red(y,x).  [clausify(2)].
+kept:      21 -red(x,y) | rp(x,y).  [clausify(4)].
+kept:      22 red(a,c) | red(a,e) | red(a,g).  [assumption].
+kept:      23 -red(a,c) | -red(a,e) | -red(a,g).  [clausify(7)].
+kept:      24 -red(a,c) | -red(a,e).  [clausify(8)].
+kept:      25 -red(a,c) | -red(a,g).  [clausify(9)].
+kept:      26 -red(a,e) | -red(a,g).  [clausify(10)].
+kept:      27 red(b,f).  [clausify(11)].
+kept:      28 red(b,i).  [clausify(11)].
+kept:      29 red(c,h).  [clausify(11)].
+kept:      30 red(d,j).  [clausify(11)].
+kept:      31 red(e,i).  [clausify(11)].
+kept:      32 red(g,i).  [clausify(11)].
+kept:      33 red(i,j).  [clausify(11)].
+kept:      34 blue(d,a) | blue(d,b).  [assumption].
+kept:      35 -blue(d,a) | -blue(d,b).  [clausify(12)].
+kept:      36 blue(c,g).  [clausify(13)].
+kept:      37 blue(d,i).  [clausify(13)].
+kept:      38 blue(e,h).  [clausify(13)].
+kept:      39 blue(f,j).  [clausify(13)].
+kept:      40 blue(g,h).  [clausify(13)].
+kept:      41 -rp(a,b).  [deny(14)].
+kept:      42 -red(x,y) | rp(z,y) | -blue(z,x).  [resolve(15,a,16,b)].
+kept:      43 -rp(x,y) | -blue(y,z) | -red(z,u) | rp(x,u).  [resolve(17,c,15,a)].
+kept:      44 -blue(a,b).  [resolve(18,a,16,b)].
+kept:      45 -rp(a,x) | -blue(x,b).  [resolve(18,a,17,c)].
+
+============================== end of process initial clauses ========
+
+============================== CLAUSES FOR SEARCH ====================
+
+% Clauses after input processing:
+
+formulas(usable).
+end_of_list.
+
+formulas(sos).
+19 -blue(x,y) | blue(y,x).  [clausify(1)].
+20 -red(x,y) | red(y,x).  [clausify(2)].
+21 -red(x,y) | rp(x,y).  [clausify(4)].
+22 red(a,c) | red(a,e) | red(a,g).  [assumption].
+24 -red(a,c) | -red(a,e).  [clausify(8)].
+25 -red(a,c) | -red(a,g).  [clausify(9)].
+26 -red(a,e) | -red(a,g).  [clausify(10)].
+27 red(b,f).  [clausify(11)].
+28 red(b,i).  [clausify(11)].
+29 red(c,h).  [clausify(11)].
+30 red(d,j).  [clausify(11)].
+31 red(e,i).  [clausify(11)].
+32 red(g,i).  [clausify(11)].
+33 red(i,j).  [clausify(11)].
+34 blue(d,a) | blue(d,b).  [assumption].
+35 -blue(d,a) | -blue(d,b).  [clausify(12)].
+36 blue(c,g).  [clausify(13)].
+37 blue(d,i).  [clausify(13)].
+38 blue(e,h).  [clausify(13)].
+39 blue(f,j).  [clausify(13)].
+40 blue(g,h).  [clausify(13)].
+41 -rp(a,b).  [deny(14)].
+42 -red(x,y) | rp(z,y) | -blue(z,x).  [resolve(15,a,16,b)].
+43 -rp(x,y) | -blue(y,z) | -red(z,u) | rp(x,u).  [resolve(17,c,15,a)].
+44 -blue(a,b).  [resolve(18,a,16,b)].
+45 -rp(a,x) | -blue(x,b).  [resolve(18,a,17,c)].
+end_of_list.
+
+formulas(demodulators).
+end_of_list.
+
+============================== end of clauses for search =============
+
+============================== SEARCH ================================
+
+% Starting search at 0.01 seconds.
+
+given #1 (I,wt=6): 19 -blue(x,y) | blue(y,x).  [clausify(1)].
+
+given #2 (I,wt=6): 20 -red(x,y) | red(y,x).  [clausify(2)].
+
+given #3 (I,wt=6): 21 -red(x,y) | rp(x,y).  [clausify(4)].
+
+given #4 (I,wt=9): 22 red(a,c) | red(a,e) | red(a,g).  [assumption].
+
+given #5 (I,wt=6): 24 -red(a,c) | -red(a,e).  [clausify(8)].
+
+given #6 (I,wt=6): 25 -red(a,c) | -red(a,g).  [clausify(9)].
+
+given #7 (I,wt=6): 26 -red(a,e) | -red(a,g).  [clausify(10)].
+
+given #8 (I,wt=3): 27 red(b,f).  [clausify(11)].
+
+given #9 (I,wt=3): 28 red(b,i).  [clausify(11)].
+
+given #10 (I,wt=3): 29 red(c,h).  [clausify(11)].
+
+given #11 (I,wt=3): 30 red(d,j).  [clausify(11)].
+
+given #12 (I,wt=3): 31 red(e,i).  [clausify(11)].
+
+given #13 (I,wt=3): 32 red(g,i).  [clausify(11)].
+
+given #14 (I,wt=3): 33 red(i,j).  [clausify(11)].
+
+given #15 (I,wt=6): 34 blue(d,a) | blue(d,b).  [assumption].
+
+given #16 (I,wt=6): 35 -blue(d,a) | -blue(d,b).  [clausify(12)].
+
+given #17 (I,wt=3): 36 blue(c,g).  [clausify(13)].
+
+given #18 (I,wt=3): 37 blue(d,i).  [clausify(13)].
+
+given #19 (I,wt=3): 38 blue(e,h).  [clausify(13)].
+
+given #20 (I,wt=3): 39 blue(f,j).  [clausify(13)].
+
+given #21 (I,wt=3): 40 blue(g,h).  [clausify(13)].
+
+given #22 (I,wt=3): 41 -rp(a,b).  [deny(14)].
+
+given #23 (I,wt=9): 42 -red(x,y) | rp(z,y) | -blue(z,x).  [resolve(15,a,16,b)].
+
+given #24 (I,wt=12): 43 -rp(x,y) | -blue(y,z) | -red(z,u) | rp(x,u).  [resolve(17,c,15,a)].
+
+given #25 (I,wt=3): 44 -blue(a,b).  [resolve(18,a,16,b)].
+
+given #26 (I,wt=6): 45 -rp(a,x) | -blue(x,b).  [resolve(18,a,17,c)].
+
+given #27 (A,wt=9): 46 red(a,c) | red(a,g) | rp(a,e).  [resolve(22,b,21,a)].
+
+given #28 (F,wt=3): 68 -red(a,b).  [ur(21,b,41,a)].
+
+given #29 (F,wt=3): 75 -blue(b,a).  [ur(19,b,44,a)].
+
+given #30 (F,wt=3): 78 -red(b,a).  [ur(20,b,68,a)].
+
+given #31 (T,wt=3): 48 rp(b,f).  [resolve(27,a,21,a)].
+
+given #32 (T,wt=3): 49 red(f,b).  [resolve(27,a,20,a)].
+
+given #33 (T,wt=3): 50 rp(b,i).  [resolve(28,a,21,a)].
+
+given #34 (T,wt=3): 51 red(i,b).  [resolve(28,a,20,a)].
+
+given #35 (A,wt=9): 47 red(a,c) | red(a,g) | red(e,a).  [resolve(22,b,20,a)].
+
+given #36 (F,wt=3): 81 -blue(a,f).  [ur(42,a,49,a,b,41,a)].
+
+given #37 (F,wt=3): 84 -rp(a,d).  [ur(43,b,37,a,c,51,a,d,41,a)].
+
+given #38 (F,wt=3): 85 -blue(a,i).  [ur(42,a,51,a,b,41,a)].
+
+given #39 (F,wt=3): 87 -blue(f,a).  [ur(19,b,81,a)].
+
+given #40 (T,wt=3): 52 rp(c,h).  [resolve(29,a,21,a)].
+
+given #41 (T,wt=3): 53 red(h,c).  [resolve(29,a,20,a)].
+
+given #42 (T,wt=3): 54 rp(d,j).  [resolve(30,a,21,a)].
+
+given #43 (T,wt=3): 55 red(j,d).  [resolve(30,a,20,a)].
+
+given #44 (A,wt=3): 56 rp(e,i).  [resolve(31,a,21,a)].
+
+given #45 (F,wt=3): 88 -red(a,d).  [ur(21,b,84,a)].
+
+given #46 (F,wt=3): 89 -blue(i,a).  [ur(19,b,85,a)].
+
+given #47 (F,wt=3): 94 -rp(a,f).  [ur(43,b,39,a,c,55,a,d,84,a)].
+
+given #48 (F,wt=3): 95 -blue(a,j).  [ur(42,a,55,a,b,84,a)].
+
+given #49 (T,wt=3): 57 red(i,e).  [resolve(31,a,20,a)].
+
+given #50 (T,wt=3): 58 rp(g,i).  [resolve(32,a,21,a)].
+
+given #51 (T,wt=3): 59 red(i,g).  [resolve(32,a,20,a)].
+
+given #52 (T,wt=3): 60 rp(i,j).  [resolve(33,a,21,a)].
+
+given #53 (A,wt=3): 61 red(j,i).  [resolve(33,a,20,a)].
+
+given #54 (F,wt=3): 97 -red(d,a).  [ur(20,b,88,a)].
+
+given #55 (F,wt=3): 98 -red(a,f).  [ur(21,b,94,a)].
+
+given #56 (F,wt=3): 99 -blue(j,a).  [ur(19,b,95,a)].
+
+given #57 (F,wt=3): 105 -red(f,a).  [ur(20,b,98,a)].
+
+given #58 (T,wt=3): 63 blue(g,c).  [resolve(36,a,19,a)].
+
+given #59 (T,wt=3): 64 blue(i,d).  [resolve(37,a,19,a)].
+
+given #60 (T,wt=3): 65 blue(h,e).  [resolve(38,a,19,a)].
+
+given #61 (T,wt=3): 66 blue(j,f).  [resolve(39,a,19,a)].
+
+given #62 (A,wt=6): 62 blue(d,a) | blue(b,d).  [resolve(34,b,19,a)].
+
+given #63 (F,wt=3): 110 -rp(a,j).  [ur(43,b,66,a,c,49,a,d,41,a)].
+
+given #64 (F,wt=3): 112 -rp(a,i).  [ur(43,b,64,a,c,30,a,d,110,a)].
+
+given #65 (F,wt=3): 113 -blue(a,d).  [ur(42,a,30,a,b,110,a)].
+
+given #66 (F,wt=3): 114 -red(a,j).  [ur(21,b,110,a)].
+
+given #67 (T,wt=3): 67 blue(h,g).  [resolve(40,a,19,a)].
+
+given #68 (T,wt=3): 80 rp(f,b).  [resolve(49,a,21,a)].
+
+given #69 (T,wt=3): 83 rp(i,b).  [resolve(51,a,21,a)].
+
+given #70 (T,wt=3): 91 rp(h,c).  [resolve(53,a,21,a)].
+
+given #71 (A,wt=6): 69 -red(h,x) | rp(g,x).  [resolve(42,c,40,a)].
+
+given #72 (F,wt=3): 115 -rp(a,h).  [ur(43,b,65,a,c,31,a,d,112,a)].
+
+given #73 (F,wt=3): 116 -rp(a,c).  [ur(43,b,36,a,c,32,a,d,112,a)].
+
+given #74 (F,wt=3): 117 -blue(a,g).  [ur(42,a,32,a,b,112,a)].
+
+given #75 (F,wt=3): 118 -blue(a,e).  [ur(42,a,31,a,b,112,a)].
+
+given #76 (T,wt=3): 93 rp(j,d).  [resolve(55,a,21,a)].
+
+given #77 (T,wt=3): 100 rp(i,e).  [resolve(57,a,21,a)].
+
+given #78 (T,wt=3): 102 rp(i,g).  [resolve(59,a,21,a)].
+
+given #79 (T,wt=3): 104 rp(j,i).  [resolve(61,a,21,a)].
+
+given #80 (A,wt=6): 70 -red(j,x) | rp(f,x).  [resolve(42,c,39,a)].
+
+given #81 (F,wt=3): 119 -red(a,i).  [ur(21,b,112,a)].
+
+given #82 (F,wt=3): 120 -blue(d,a).  [ur(19,b,113,a)].
+
+given #83 (F,wt=3): 125 -red(j,a).  [ur(20,b,114,a)].
+
+given #84 (F,wt=3): 131 -rp(a,g).  [ur(43,b,63,a,c,29,a,d,115,a)].
+
+============================== PROOF =================================
+
+% Proof 1 at 0.02 (+ 0.00) seconds.
+% Length of proof is 41.
+% Level of proof is 8.
+% Maximum clause weight is 12.
+% Given clauses 84.
+
+1 blue(x,y) -> blue(y,x) # label(non_clause).  [assumption].
+2 red(x,y) -> red(y,x) # label(non_clause).  [assumption].
+4 red(x,y) -> rp(x,y) # label(non_clause).  [assumption].
+5 bp(x,y) & red(y,z) -> rp(x,z) # label(non_clause).  [assumption].
+6 rp(x,y) & blue(y,z) -> bp(x,z) # label(non_clause).  [assumption].
+11 red(b,f) & red(b,i) & red(c,h) & red(d,j) & red(e,i) & red(g,i) & red(i,j) # label(non_clause).  [assumption].
+13 blue(c,g) & blue(d,i) & blue(e,h) & blue(f,j) & blue(g,h) # label(non_clause).  [assumption].
+14 rp(a,b) | bp(a,b) # label(non_clause) # label(goal).  [goal].
+15 -bp(x,y) | -red(y,z) | rp(x,z).  [clausify(5)].
+17 -rp(x,y) | -blue(y,z) | bp(x,z).  [clausify(6)].
+19 -blue(x,y) | blue(y,x).  [clausify(1)].
+20 -red(x,y) | red(y,x).  [clausify(2)].
+21 -red(x,y) | rp(x,y).  [clausify(4)].
+22 red(a,c) | red(a,e) | red(a,g).  [assumption].
+27 red(b,f).  [clausify(11)].
+29 red(c,h).  [clausify(11)].
+30 red(d,j).  [clausify(11)].
+31 red(e,i).  [clausify(11)].
+32 red(g,i).  [clausify(11)].
+36 blue(c,g).  [clausify(13)].
+37 blue(d,i).  [clausify(13)].
+38 blue(e,h).  [clausify(13)].
+39 blue(f,j).  [clausify(13)].
+41 -rp(a,b).  [deny(14)].
+43 -rp(x,y) | -blue(y,z) | -red(z,u) | rp(x,u).  [resolve(17,c,15,a)].
+46 red(a,c) | red(a,g) | rp(a,e).  [resolve(22,b,21,a)].
+49 red(f,b).  [resolve(27,a,20,a)].
+53 red(h,c).  [resolve(29,a,20,a)].
+63 blue(g,c).  [resolve(36,a,19,a)].
+64 blue(i,d).  [resolve(37,a,19,a)].
+65 blue(h,e).  [resolve(38,a,19,a)].
+66 blue(j,f).  [resolve(39,a,19,a)].
+110 -rp(a,j).  [ur(43,b,66,a,c,49,a,d,41,a)].
+112 -rp(a,i).  [ur(43,b,64,a,c,30,a,d,110,a)].
+115 -rp(a,h).  [ur(43,b,65,a,c,31,a,d,112,a)].
+116 -rp(a,c).  [ur(43,b,36,a,c,32,a,d,112,a)].
+131 -rp(a,g).  [ur(43,b,63,a,c,29,a,d,115,a)].
+134 -rp(a,e).  [ur(43,b,38,a,c,53,a,d,116,a)].
+136 -red(a,c).  [ur(21,b,116,a)].
+137 red(a,g).  [back_unit_del(46),unit_del(a,136),unit_del(c,134)].
+148 $F.  [ur(21,b,131,a),unit_del(a,137)].
+
+============================== end of proof ==========================
+
+============================== STATISTICS ============================
+
+Given=84. Generated=171. Kept=129. proofs=1.
+Usable=75. Sos=39. Demods=0. Limbo=0, Disabled=46. Hints=0.
+Kept_by_rule=0, Deleted_by_rule=0.
+Forward_subsumed=41. Back_subsumed=4.
+Sos_limit_deleted=0. Sos_displaced=0. Sos_removed=0.
+New_demodulators=0 (0 lex), Back_demodulated=0. Back_unit_deleted=11.
+Demod_attempts=0. Demod_rewrites=0.
+Res_instance_prunes=0. Para_instance_prunes=0. Basic_paramod_prunes=0.
+Nonunit_fsub_feature_tests=55. Nonunit_bsub_feature_tests=66.
+Megabytes=0.11.
+User_CPU=0.02, System_CPU=0.00, Wall_clock=0.
+
+============================== end of statistics =====================
+
+============================== end of search =========================
+
+THEOREM PROVED
+
+Exiting with 1 proof.
+
+Process 13274 exit (max_proofs) Fri Jan 16 10:09:48 2015

@@ -1,0 +1,26 @@
+formulas(assumptions).
+blue(x,y) -> blue(y,x).
+red(x,y) -> red(y,x).
+	
+blue(x,y) -> bp(x,y).
+red(x,y) -> rp(x,y).
+
+(bp(x,y) & red(y,z)) -> rp(x,z).
+(rp(x,y) & blue(y,z)) -> bp(x,z).
+
+red(a,e).
+
+red(b,f) & red(b,i) & red(c,h) & red(d,j) & red(e,i) & red(g,i) & red(i,j).
+
+blue(d,b).
+
+blue(c,g) & blue(d,i) & blue(e,h) & blue(f,j) & blue(g,h).
+	
+end_of_list.
+
+formulas(goals).
+	rp(a,b).
+end_of_list.
+
+	
+	

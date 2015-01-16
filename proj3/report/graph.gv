@@ -1,0 +1,39 @@
+graph G {
+
+	graph 	[center=1 rankdir=LR]
+		edge [dir=none]
+
+	{
+		edge [color="red", style=dashed];
+		A -- C
+		A -- G
+		A -- E
+	}
+
+	{
+		edge [color="red"];
+		B -- F
+		B -- I
+		C -- H
+		D -- J
+		E -- I
+		G -- I
+		I -- J
+	}
+
+	{
+		edge [color="blue", style=dashed];
+		D -- A
+		D -- B
+	}
+
+	{
+		edge [color="blue"];
+		C -- G
+		D -- I
+		E -- H
+		F -- J
+		G -- H
+	}
+
+}
